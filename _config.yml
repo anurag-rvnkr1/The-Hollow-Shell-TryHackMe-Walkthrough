@@ -1,0 +1,14 @@
+title: "TryHackMe CTF"
+description: "Professional CTF documentation."
+
+theme: jekyll-theme-primer
+
+plugins:
+  - jekyll-relative-links
+
+relative_links:
+  enabled: true
+  collections: true
+
+include:
+  - docs
