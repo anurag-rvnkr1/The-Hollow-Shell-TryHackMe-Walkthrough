@@ -56,7 +56,7 @@ A complete technical write-up documenting the compromise path of **The Hollow Sh
 <div><strong>RCE</strong><span>Final impact</span></div>
 </div>
 
-![The Hollow Shell cover](assets/01-cover.svg)
+![The Hollow Shell cover](../docs/assets/01-cover.svg)
 
 <p class="evidence-caption">Figure 1 — The Hollow Shell challenge cover.</p>
 
@@ -188,7 +188,7 @@ The important exposed services were:
 
 The presence of an HTTP service on port `5000` was the primary attack surface.
 
-![Nmap reconnaissance](assets/02-recon-nmap.svg)
+![Nmap reconnaissance](../docs/assets/02-recon-nmap.svg)
 
 <p class="evidence-caption">Figure 2 — Initial Nmap reconnaissance identifying TCP/22 and TCP/5000.</p>
 
@@ -221,7 +221,7 @@ A normal `GET` request produced:
 405 Method Not Allowed
 ```
 
-![Upload endpoint](assets/03-upload-method.svg)
+![Upload endpoint](../docs/assets/03-upload-method.svg)
 
 <p class="evidence-caption">Figure 3 — The /upload endpoint rejects an unsupported HTTP method.</p>
 
@@ -254,7 +254,7 @@ user: concierge
 pass: [REDACTED]
 ```
 
-![Source disclosure](assets/04-source-disclosure.svg)
+![Source disclosure](../docs/assets/04-source-disclosure.svg)
 
 <p class="evidence-caption">Figure 4 — Credentials exposed through an HTML source comment.</p>
 
@@ -292,7 +292,7 @@ The disclosed credentials were used to access the application.
 
 After authentication, the application presented the **Shoreline Display** dashboard.
 
-![Shoreline Display dashboard](assets/05-dashboard-upload.svg)
+![Shoreline Display dashboard](../docs/assets/05-dashboard-upload.svg)
 
 <p class="evidence-caption">Figure 5 — Authenticated Shoreline Display dashboard and shell-upload functionality.</p>
 
@@ -325,7 +325,7 @@ test.zip
 └── shell.json
 ```
 
-![Normal ZIP upload](assets/06-test-upload.svg)
+![Normal ZIP upload](../docs/assets/06-test-upload.svg)
 
 <p class="evidence-caption">Figure 6 — Baseline ZIP upload used to understand normal application behavior.</p>
 
@@ -396,7 +396,7 @@ The archive contained:
 
 The application subsequently exposed the resulting file outside the expected random shell directory.
 
-![Zip Slip marker](assets/07-zipslip-marker.svg)
+![Zip Slip marker](../docs/assets/07-zipslip-marker.svg)
 
 <p class="evidence-caption">Figure 7 — Controlled Zip Slip marker demonstrating path traversal during extraction.</p>
 
@@ -428,7 +428,7 @@ The file contained a harmless marker:
 ZIP_SLIP_CONFIRMED
 ```
 
-![Static file proof](assets/08-zipslip-static-proof.svg)
+![Static file proof](../docs/assets/08-zipslip-static-proof.svg)
 
 <p class="evidence-caption">Figure 8 — Controlled write into a static location confirms arbitrary file placement.</p>
 
@@ -470,7 +470,7 @@ A controlled file was therefore written to:
 
 The test was intentionally designed to establish whether a Python file could be planted in the worker's hook directory.
 
-![Hook write](assets/09-hook-write.svg)
+![Hook write](../docs/assets/09-hook-write.svg)
 
 <p class="evidence-caption">Figure 9 — Controlled placement of a Python hook using the archive traversal primitive.</p>
 
@@ -524,7 +524,7 @@ zf.writestr(
 zf.close()
 ```
 
-![Payload archive](assets/10-payload-archive.svg)
+![Payload archive](../docs/assets/10-payload-archive.svg)
 
 <p class="evidence-caption">Figure 10 — Payload archive containing the required shell definition and traversal-based hook placement.</p>
 
@@ -598,7 +598,7 @@ and the working directory was:
 /var/www/conch
 ```
 
-![Reverse shell and redacted flag evidence](assets/11-shell-flag-redacted.svg)
+![Reverse shell and redacted flag evidence](../docs/assets/11-shell-flag-redacted.svg)
 
 <p class="evidence-caption">Figure 11 — Successful shell access and redacted flag evidence. The flag value is intentionally omitted from this public write-up.</p>
 
