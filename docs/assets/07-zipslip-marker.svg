@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720">
+<rect width="1200" height="720" fill="#0B1020"/>
+<rect width="1200" height="92" fill="#142033"/>
+<text x="42" y="38" fill="#DDB146" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="28px" font-weight="700" text-anchor="start">ZIP SLIP DISCOVERY</text>
+<rect x="42" y="62" width="310" height="4" fill="#4DC1DB"/>
+<rect x="0" y="92" width="1200" height="558" fill="#0F1626"/>
+<rect x="0" y="650" width="1200" height="70" fill="#142033"/>
+<text x="42" y="692" fill="#AAB6C5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17px" font-weight="700" text-anchor="start">GENERATED PORTFOLIO EVIDENCE</text>
+<text x="1155" y="692" fill="#AAB6C5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17px" font-weight="700" text-anchor="end">THE HOLLOW SHELL</text>
+<text x="70" y="150" fill="#F5F7FA" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24px" font-weight="400" text-anchor="start">Archive member: ../marker.txt</text>
+<text x="70" y="196" fill="#F5F7FA" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24px" font-weight="400" text-anchor="start"></text>
+<text x="70" y="242" fill="#F5F7FA" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24px" font-weight="400" text-anchor="start">Expected: /shells/&lt;id&gt;/marker.txt</text>
+<text x="70" y="288" fill="#F5F7FA" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24px" font-weight="400" text-anchor="start">Observed:  /shells/marker.txt</text>
+<text x="70" y="334" fill="#F5F7FA" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24px" font-weight="400" text-anchor="start"></text>
+<text x="70" y="380" fill="#F5F7FA" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24px" font-weight="400" text-anchor="start">Traversal escapes the intended extraction directory.</text>
+</svg>
