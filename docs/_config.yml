@@ -1,0 +1,8 @@
+title: "The Hollow Shell — Portfolio Write-up"
+description: "TryHackMe Hacker Holidays 2026 Day 10: Zip Slip, arbitrary file write, worker execution, and reverse shell."
+theme: jekyll-theme-primer
+plugins:
+  - jekyll-relative-links
+relative_links:
+  enabled: true
+  collections: true
