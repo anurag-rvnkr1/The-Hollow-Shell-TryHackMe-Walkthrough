@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720">
+<rect width="1200" height="720" fill="#0B1020"/>
+<rect width="1200" height="92" fill="#142033"/>
+<text x="42" y="38" fill="#DDB146" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="28px" font-weight="700" text-anchor="start">ROOM OVERVIEW</text>
+<rect x="42" y="62" width="310" height="4" fill="#4DC1DB"/>
+<rect x="0" y="92" width="1200" height="558" fill="#0F1626"/>
+<rect x="0" y="650" width="1200" height="70" fill="#142033"/>
+<text x="42" y="692" fill="#AAB6C5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17px" font-weight="700" text-anchor="start">GENERATED PORTFOLIO EVIDENCE</text>
+<text x="1155" y="692" fill="#AAB6C5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17px" font-weight="700" text-anchor="end">THE HOLLOW SHELL</text>
+<text x="600" y="230" fill="#F5F7FA" font-family="Georgia, serif" font-size="70px" font-weight="700" text-anchor="middle">The Hollow Shell</text>
+<text x="600" y="285" fill="#DDB146" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="24px" font-weight="700" text-anchor="middle">TryHackMe • Hacker Holidays 2026 • Day 10</text>
+<circle cx="600" cy="395" r="48" fill="#DDB146"/>
+<text x="600" y="413" fill="#142033" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18px" font-weight="700" text-anchor="middle">SHELL</text>
+<text x="600" y="505" fill="#AAB6C5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22px" font-weight="400" text-anchor="middle">Web exploitation • Zip Slip • Arbitrary File Write • Worker-mediated execution</text>
+</svg>

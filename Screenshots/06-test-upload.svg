@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720">
+<rect width="1200" height="720" fill="#0B1020"/>
+<rect width="1200" height="92" fill="#142033"/>
+<text x="42" y="38" fill="#DDB146" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="28px" font-weight="700" text-anchor="start">BASELINE UPLOAD</text>
+<rect x="42" y="62" width="310" height="4" fill="#4DC1DB"/>
+<rect x="0" y="92" width="1200" height="558" fill="#0F1626"/>
+<rect x="0" y="650" width="1200" height="70" fill="#142033"/>
+<text x="42" y="692" fill="#AAB6C5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17px" font-weight="700" text-anchor="start">GENERATED PORTFOLIO EVIDENCE</text>
+<text x="1155" y="692" fill="#AAB6C5" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17px" font-weight="700" text-anchor="end">THE HOLLOW SHELL</text>
+<rect x="45" y="125" width="1110" height="465" rx="10" fill="#F6F7F9"/>
+<rect x="45" y="125" width="1110" height="62" rx="10" fill="#E8EBF0"/>
+<circle cx="75" cy="156" r="8" fill="#C5CBD4"/>
+<circle cx="101" cy="156" r="8" fill="#C5CBD4"/>
+<circle cx="127" cy="156" r="8" fill="#C5CBD4"/>
+<text x="180" y="164" fill="#4B5563" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18px" font-weight="400" text-anchor="start">Shoreline Display</text>
+<rect x="70" y="215" width="1060" height="330" rx="8" fill="#0B1020"/>
+<text x="105" y="270" fill="#F5F7FA" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="23px" font-weight="400" text-anchor="start">Stored at shells/&lt;random-id&gt;/</text>
+<text x="105" y="318" fill="#F5F7FA" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="23px" font-weight="400" text-anchor="start">Shells on display</text>
+<text x="105" y="366" fill="#F5F7FA" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="23px" font-weight="400" text-anchor="start">  test                         shells/&lt;random-id&gt;/</text>
+</svg>
