@@ -1,0 +1,918 @@
+/* ============================================================
+THE HOLLOW SHELL — CUSTOM JEKYLL / PRIMER STYLES
+TryHackMe Hacker Holidays 2026
+Repository: The-Hollow-Shell-TryHackMe-Walkthrough
+
+Loaded from:
+docs/_sass/custom.scss
+
+Imported by:
+docs/assets/css/style.scss
+============================================================ */
+
+/* ============================================================
+01. DESIGN TOKENS
+============================================================ */
+
+:root {
+--ths-bg: #0d1117;
+--ths-surface: #161b22;
+--ths-surface-2: #1c2128;
+--ths-border: #30363d;
+
+--ths-text: #e6edf3;
+--ths-muted: #8b949e;
+--ths-heading: #f0f6fc;
+
+--ths-accent: #58a6ff;
+--ths-accent-strong: #1f6feb;
+--ths-green: #3fb950;
+--ths-yellow: #d29922;
+--ths-red: #f85149;
+--ths-purple: #bc8cff;
+
+--ths-radius: 12px;
+--ths-radius-small: 8px;
+
+--ths-shadow:
+0 8px 30px rgba(0, 0, 0, 0.28);
+
+--ths-content-width: 1180px;
+}
+
+/* ============================================================
+02. GLOBAL PAGE
+============================================================ */
+
+html {
+scroll-behavior: smooth;
+}
+
+body {
+background: var(--ths-bg);
+color: var(--ths-text);
+font-family:
+-apple-system,
+BlinkMacSystemFont,
+"Segoe UI",
+Helvetica,
+Arial,
+sans-serif;
+
+line-height: 1.75;
+font-size: 16px;
+overflow-x: hidden;
+}
+
+.wrapper {
+max-width: var(--ths-content-width);
+}
+
+/* ============================================================
+03. TYPOGRAPHY
+============================================================ */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+color: var(--ths-heading);
+font-weight: 700;
+line-height: 1.25;
+}
+
+h1 {
+font-size: clamp(2rem, 5vw, 3.4rem);
+letter-spacing: -0.035em;
+}
+
+h2 {
+margin-top: 3rem;
+padding-bottom: 0.65rem;
+border-bottom: 1px solid var(--ths-border);
+font-size: clamp(1.55rem, 3vw, 2.15rem);
+}
+
+h3 {
+margin-top: 2rem;
+font-size: 1.35rem;
+}
+
+h4 {
+font-size: 1.1rem;
+}
+
+p {
+color: var(--ths-text);
+}
+
+strong {
+color: var(--ths-heading);
+}
+
+small {
+color: var(--ths-muted);
+}
+
+/* ============================================================
+04. LINKS
+============================================================ */
+
+a {
+color: var(--ths-accent);
+text-decoration: none;
+transition:
+color 0.18s ease,
+opacity 0.18s ease;
+}
+
+a:hover,
+a:focus {
+color: #79c0ff;
+text-decoration: underline;
+}
+
+/* ============================================================
+05. HEADER / HERO
+============================================================ */
+
+header {
+border-bottom: 1px solid var(--ths-border);
+}
+
+.site-header {
+padding: 2rem 0;
+}
+
+.site-title {
+color: var(--ths-heading);
+font-weight: 800;
+letter-spacing: -0.025em;
+}
+
+.site-description {
+color: var(--ths-muted);
+}
+
+/* ============================================================
+06. HERO BLOCKS
+============================================================ */
+
+.hero,
+.hero-section,
+.hero-card {
+position: relative;
+overflow: hidden;
+
+padding: 3rem;
+margin: 1.5rem 0 2.5rem;
+
+background:
+radial-gradient(
+circle at 85% 15%,
+rgba(88, 166, 255, 0.16),
+transparent 32%
+),
+radial-gradient(
+circle at 10% 90%,
+rgba(188, 140, 255, 0.10),
+transparent 30%
+),
+var(--ths-surface);
+
+border: 1px solid var(--ths-border);
+border-radius: 18px;
+
+box-shadow: var(--ths-shadow);
+}
+
+.hero::before,
+.hero-section::before,
+.hero-card::before {
+content: "";
+
+position: absolute;
+inset: 0;
+
+pointer-events: none;
+
+background:
+linear-gradient(
+135deg,
+rgba(255, 255, 255, 0.025),
+transparent 45%
+);
+}
+
+.hero h1,
+.hero-section h1,
+.hero-card h1 {
+position: relative;
+z-index: 1;
+}
+
+.hero p,
+.hero-section p,
+.hero-card p {
+position: relative;
+z-index: 1;
+}
+
+/* ============================================================
+07. BADGES / PILLS
+============================================================ */
+
+.badge,
+.tag,
+.pill,
+.meta-badge {
+display: inline-flex;
+align-items: center;
+
+padding: 0.3rem 0.7rem;
+
+margin: 0.2rem 0.2rem 0.2rem 0;
+
+border: 1px solid var(--ths-border);
+border-radius: 999px;
+
+background: var(--ths-surface-2);
+
+color: var(--ths-muted);
+
+font-size: 0.78rem;
+font-weight: 700;
+letter-spacing: 0.025em;
+}
+
+/* ============================================================
+08. CARDS
+============================================================ */
+
+.card,
+.info-card,
+.metric-card,
+.evidence-card,
+.step-card,
+.finding-card {
+background: var(--ths-surface);
+
+border: 1px solid var(--ths-border);
+border-radius: var(--ths-radius);
+
+padding: 1.35rem;
+
+box-shadow:
+0 4px 18px rgba(0, 0, 0, 0.16);
+
+transition:
+transform 0.2s ease,
+border-color 0.2s ease,
+box-shadow 0.2s ease;
+}
+
+.card:hover,
+.info-card:hover,
+.metric-card:hover,
+.evidence-card:hover,
+.step-card:hover,
+.finding-card:hover {
+transform: translateY(-2px);
+
+border-color: rgba(88, 166, 255, 0.45);
+
+box-shadow:
+0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+/* ============================================================
+09. METRIC / STAT GRID
+============================================================ */
+
+.metrics,
+.metric-grid,
+.stats-grid {
+display: grid;
+
+grid-template-columns:
+repeat(auto-fit, minmax(160px, 1fr));
+
+gap: 1rem;
+
+margin: 2rem 0;
+}
+
+.metric-card strong,
+.metric-value {
+display: block;
+
+color: var(--ths-heading);
+
+font-size: 1.8rem;
+font-weight: 800;
+}
+
+.metric-card span,
+.metric-label {
+color: var(--ths-muted);
+font-size: 0.85rem;
+}
+
+/* ============================================================
+10. TWO / THREE COLUMN LAYOUTS
+============================================================ */
+
+.grid-2,
+.two-column {
+display: grid;
+
+grid-template-columns:
+repeat(2, minmax(0, 1fr));
+
+gap: 1.25rem;
+
+margin: 1.5rem 0;
+}
+
+.grid-3,
+.three-column {
+display: grid;
+
+grid-template-columns:
+repeat(3, minmax(0, 1fr));
+
+gap: 1.25rem;
+
+margin: 1.5rem 0;
+}
+
+/* ============================================================
+11. CODE BLOCKS
+============================================================ */
+
+code {
+padding: 0.15rem 0.4rem;
+
+background: rgba(110, 118, 129, 0.16);
+
+border: 1px solid rgba(110, 118, 129, 0.2);
+
+border-radius: 5px;
+
+color: #f0f6fc;
+
+font-family:
+"SFMono-Regular",
+Consolas,
+"Liberation Mono",
+Menlo,
+monospace;
+
+font-size: 0.9em;
+}
+
+pre {
+margin: 1.5rem 0;
+
+padding: 1.2rem 1.35rem;
+
+overflow-x: auto;
+
+background: #010409;
+
+border: 1px solid var(--ths-border);
+
+border-radius: var(--ths-radius-small);
+
+box-shadow:
+inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+pre code {
+padding: 0;
+
+background: transparent;
+
+border: 0;
+
+color: #e6edf3;
+
+font-size: 0.88rem;
+
+line-height: 1.65;
+}
+
+/* ============================================================
+12. COMMAND / TERMINAL BLOCKS
+============================================================ */
+
+.terminal,
+.terminal-block {
+position: relative;
+
+margin: 1.5rem 0;
+
+padding: 1.4rem;
+
+background: #010409;
+
+border: 1px solid #30363d;
+
+border-radius: 10px;
+
+box-shadow:
+0 8px 25px rgba(0, 0, 0, 0.25);
+}
+
+.terminal::before,
+.terminal-block::before {
+content: "●  ●  ●";
+
+display: block;
+
+margin-bottom: 0.8rem;
+
+color: var(--ths-muted);
+
+font-size: 0.7rem;
+letter-spacing: 0.2rem;
+}
+
+.terminal code,
+.terminal-block code {
+color: #e6edf3;
+}
+
+/* ============================================================
+13. TABLES
+============================================================ */
+
+table {
+display: table;
+
+width: 100%;
+
+margin: 1.5rem 0;
+
+overflow: hidden;
+
+background: var(--ths-surface);
+
+border: 1px solid var(--ths-border);
+border-collapse: separate;
+border-spacing: 0;
+
+border-radius: var(--ths-radius);
+
+color: var(--ths-text);
+}
+
+thead {
+background: var(--ths-surface-2);
+}
+
+th {
+color: var(--ths-heading);
+font-weight: 700;
+}
+
+th,
+td {
+padding: 0.85rem 1rem;
+
+border-bottom: 1px solid var(--ths-border);
+
+text-align: left;
+}
+
+tbody tr:last-child td {
+border-bottom: 0;
+}
+
+tbody tr:hover {
+background: rgba(88, 166, 255, 0.035);
+}
+
+/* ============================================================
+14. BLOCKQUOTES
+============================================================ */
+
+blockquote {
+margin: 1.5rem 0;
+
+padding: 1rem 1.25rem;
+
+background: var(--ths-surface);
+
+border-left: 4px solid var(--ths-accent);
+
+border-radius: 0 var(--ths-radius-small) var(--ths-radius-small) 0;
+
+color: var(--ths-muted);
+}
+
+blockquote p {
+color: var(--ths-text);
+}
+
+/* ============================================================
+15. ALERTS / CALLOUTS
+============================================================ */
+
+.callout,
+.alert,
+.note,
+.warning,
+.tip {
+margin: 1.5rem 0;
+
+padding: 1.15rem 1.3rem;
+
+background: var(--ths-surface);
+
+border: 1px solid var(--ths-border);
+
+border-left: 4px solid var(--ths-accent);
+
+border-radius: var(--ths-radius-small);
+}
+
+.warning {
+border-left-color: var(--ths-yellow);
+}
+
+.danger,
+.critical {
+border-left-color: var(--ths-red);
+}
+
+.success {
+border-left-color: var(--ths-green);
+}
+
+.callout-title,
+.alert-title {
+margin-bottom: 0.35rem;
+
+color: var(--ths-heading);
+
+font-weight: 800;
+}
+
+/* ============================================================
+16. EVIDENCE / SCREENSHOTS
+============================================================ */
+
+.evidence,
+.screenshot,
+.evidence-image {
+margin: 1.5rem 0;
+
+padding: 0.5rem;
+
+background: var(--ths-surface);
+
+border: 1px solid var(--ths-border);
+
+border-radius: var(--ths-radius);
+
+box-shadow:
+0 8px 28px rgba(0, 0, 0, 0.22);
+}
+
+.evidence img,
+.screenshot img,
+.evidence-image img {
+display: block;
+
+width: 100%;
+height: auto;
+
+border-radius: calc(var(--ths-radius) - 4px);
+}
+
+figcaption {
+margin-top: 0.75rem;
+
+color: var(--ths-muted);
+
+font-size: 0.82rem;
+text-align: center;
+}
+
+/* ============================================================
+17. ATTACK PATH
+============================================================ */
+
+.attack-path,
+.attack-chain,
+.timeline {
+display: flex;
+
+flex-wrap: wrap;
+
+align-items: center;
+
+gap: 0.6rem;
+
+margin: 2rem 0;
+}
+
+.attack-step,
+.attack-node {
+padding: 0.7rem 0.9rem;
+
+background: var(--ths-surface);
+
+border: 1px solid var(--ths-border);
+
+border-radius: var(--ths-radius-small);
+
+color: var(--ths-heading);
+
+font-size: 0.85rem;
+font-weight: 700;
+}
+
+.attack-arrow {
+color: var(--ths-accent);
+
+font-weight: 800;
+}
+
+/* ============================================================
+18. SECURITY FINDINGS
+============================================================ */
+
+.severity-critical {
+color: var(--ths-red);
+}
+
+.severity-high {
+color: #ff7b72;
+}
+
+.severity-medium {
+color: var(--ths-yellow);
+}
+
+.severity-low {
+color: var(--ths-green);
+}
+
+.severity-info {
+color: var(--ths-accent);
+}
+
+/* ============================================================
+19. LISTS
+============================================================ */
+
+ul,
+ol {
+padding-left: 1.5rem;
+}
+
+li {
+margin: 0.35rem 0;
+}
+
+li::marker {
+color: var(--ths-accent);
+}
+
+/* ============================================================
+20. HORIZONTAL RULES
+============================================================ */
+
+hr {
+height: 1px;
+
+margin: 3rem 0;
+
+border: 0;
+
+background: var(--ths-border);
+}
+
+/* ============================================================
+21. IMAGES
+============================================================ */
+
+main img {
+max-width: 100%;
+height: auto;
+}
+
+main img:not(.no-border) {
+border-radius: var(--ths-radius-small);
+}
+
+/* ============================================================
+22. BUTTONS
+============================================================ */
+
+.btn,
+.button,
+a.btn {
+display: inline-flex;
+
+align-items: center;
+justify-content: center;
+
+padding: 0.65rem 1rem;
+
+border: 1px solid var(--ths-border);
+border-radius: var(--ths-radius-small);
+
+background: var(--ths-surface-2);
+
+color: var(--ths-heading);
+
+font-weight: 700;
+
+text-decoration: none;
+
+transition:
+background 0.18s ease,
+border-color 0.18s ease,
+transform 0.18s ease;
+}
+
+.btn:hover,
+.button:hover,
+a.btn:hover {
+background: #21262d;
+
+border-color: var(--ths-accent);
+
+color: var(--ths-heading);
+
+text-decoration: none;
+
+transform: translateY(-1px);
+}
+
+/* ============================================================
+23. FOOTER
+============================================================ */
+
+footer {
+margin-top: 4rem;
+
+padding-top: 2rem;
+
+border-top: 1px solid var(--ths-border);
+
+color: var(--ths-muted);
+
+font-size: 0.85rem;
+}
+
+/* ============================================================
+24. SELECTION
+============================================================ */
+
+::selection {
+background: rgba(88, 166, 255, 0.28);
+
+color: var(--ths-heading);
+}
+
+/* ============================================================
+25. SCROLLBAR
+============================================================ */
+
+::-webkit-scrollbar {
+width: 10px;
+height: 10px;
+}
+
+::-webkit-scrollbar-track {
+background: var(--ths-bg);
+}
+
+::-webkit-scrollbar-thumb {
+background: #30363d;
+
+border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+background: #484f58;
+}
+
+/* ============================================================
+26. MOBILE RESPONSIVENESS
+============================================================ */
+
+@media screen and (max-width: 800px) {
+
+body {
+font-size: 15px;
+}
+
+.hero,
+.hero-section,
+.hero-card {
+padding: 1.5rem;
+}
+
+.grid-2,
+.grid-3,
+.two-column,
+.three-column {
+grid-template-columns: 1fr;
+}
+
+.metrics,
+.metric-grid,
+.stats-grid {
+grid-template-columns:
+repeat(2, minmax(0, 1fr));
+}
+
+pre {
+padding: 1rem;
+}
+
+table {
+font-size: 0.85rem;
+}
+
+th,
+td {
+padding: 0.65rem;
+}
+}
+
+@media screen and (max-width: 480px) {
+
+.metrics,
+.metric-grid,
+.stats-grid {
+grid-template-columns: 1fr;
+}
+
+.attack-path,
+.attack-chain,
+.timeline {
+flex-direction: column;
+align-items: stretch;
+}
+
+.attack-arrow {
+text-align: center;
+transform: rotate(90deg);
+}
+}
+
+/* ============================================================
+27. ACCESSIBILITY
+============================================================ */
+
+:focus-visible {
+outline: 2px solid var(--ths-accent);
+
+outline-offset: 3px;
+
+border-radius: 4px;
+}
+
+/* ============================================================
+28. PRINT
+============================================================ */
+
+@media print {
+
+body {
+background: #ffffff;
+color: #000000;
+}
+
+.hero,
+.hero-section,
+.hero-card,
+.card,
+.info-card,
+.metric-card,
+.evidence-card,
+.step-card,
+.finding-card {
+box-shadow: none;
+background: #ffffff;
+border: 1px solid #cccccc;
+}
+
+a {
+color: #000000;
+text-decoration: underline;
+}
+
+pre {
+background: #f5f5f5;
+color: #000000;
+}
+}
