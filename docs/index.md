@@ -1,350 +1,312 @@
----
-layout: default
-title: "The Hollow Shell — Premium CTF Write-up"
-description: "Portfolio-grade TryHackMe documentation covering reconnaissance, source disclosure, Zip Slip, arbitrary file write, worker-mediated execution, and reverse-shell access."
----
+<div class="ctf-hero">
 
-<style>
-.hero {
-  padding: 2.5rem 2rem;
-  margin: 1rem 0 2rem;
-  border: 1px solid #d8dee6;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #142033 0%, #1d3a52 58%, #0b5268 100%);
-  color: #fff;
-  box-shadow: 0 14px 40px rgba(20, 32, 51, 0.16);
-}
-.hero h1 {
-  color: #fff !important;
-  border: 0 !important;
-  margin: 0 0 .65rem;
-  font-size: clamp(2.3rem, 6vw, 4.4rem);
-  letter-spacing: -.035em;
-}
-.hero p {
-  color: #dce7ef;
-  max-width: 850px;
-  font-size: 1.05rem;
-}
-.hero .meta {
-  color: #ddb146;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  font-size: .82rem;
-}
-.pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .5rem;
-  margin: 1.25rem 0 0;
-}
-.pill {
-  display: inline-block;
-  padding: .35rem .75rem;
-  border-radius: 999px;
-  background: rgba(255,255,255,.11);
-  border: 1px solid rgba(255,255,255,.18);
-  color: #fff;
-  font-size: .82rem;
-  font-weight: 650;
-}
-.callout {
-  border-left: 4px solid #4dc1db;
-  padding: 1rem 1.15rem;
-  margin: 1.25rem 0;
-  background: #f2f8fa;
-  border-radius: 0 10px 10px 0;
-}
-.warning {
-  border-left-color: #ddb146;
-  background: #fff9eb;
-}
-.evidence {
-  margin: 1.5rem 0 2.25rem;
-  text-align: center;
-}
-.evidence img {
-  max-width: 100%;
-  border-radius: 12px;
-}
-.evidence figcaption {
-  margin-top: .55rem;
-  color: #667085;
-  font-size: .85rem;
-}
-.metric-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
-  gap: .75rem;
-  margin: 1.25rem 0 1.75rem;
-}
-.metric {
-  padding: 1rem;
-  border: 1px solid #d8dee6;
-  border-radius: 12px;
-  background: #fff;
-}
-.metric strong {
-  display: block;
-  font-size: 1.25rem;
-  color: #142033;
-}
-.metric span {
-  color: #667085;
-  font-size: .85rem;
-}
-.chain {
-  padding: 1.25rem;
-  border-radius: 14px;
-  background: #0f1626;
-  color: #e7edf4;
-  overflow-x: auto;
-}
-.section-kicker {
-  color: #0b7285;
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  font-size: .75rem;
-  font-weight: 800;
-}
-</style>
+  <h1>The Hollow Shell</h1>
 
-<div class="hero">
+  <p>
+    A technical investigation of the Byte Lotus Shoreline Display portal,
+    demonstrating how unsafe ZIP extraction and an insufficiently isolated
+    background worker can combine to create a remote-code-execution path.
+  </p>
 
-<div class="meta">TryHackMe · Hacker Holidays 2026 · Day 10</div>
-
-# 🐚 The Hollow Shell
-
-<p><strong>From an ordinary ZIP upload to a filesystem trust-boundary failure.</strong></p>
-
-<p>
-A portfolio-grade technical investigation of the Byte Lotus Shoreline Display portal,
-covering reconnaissance, source disclosure, unsafe archive extraction, Zip Slip,
-arbitrary file write, background-worker abuse, and controlled shell access.
-</p>
-
-<div class="pills">
-<span class="pill">Web Security</span>
-<span class="pill">Zip Slip</span>
-<span class="pill">Path Traversal</span>
-<span class="pill">Arbitrary File Write</span>
-<span class="pill">Worker Analysis</span>
-<span class="pill">Reverse Shell</span>
-<span class="pill">Linux</span>
-</div>
+  <div class="ctf-badges">
+    <span class="ctf-badge">TryHackMe</span>
+    <span class="ctf-badge">Hacker Holidays 2026</span>
+    <span class="ctf-badge">Day 10</span>
+    <span class="ctf-badge">Medium</span>
+    <span class="ctf-badge">Web Security</span>
+    <span class="ctf-badge">Zip Slip</span>
+    <span class="ctf-badge">Linux</span>
+  </div>
 
 </div>
 
 <div class="callout warning">
 
-### 🔐 Public-portfolio policy
+### Public Portfolio Policy
 
-The final challenge flag is **intentionally redacted** throughout this documentation. Target-specific addresses are normalized to placeholders where appropriate.
+The final challenge flag is intentionally redacted. Target-specific addresses are represented by placeholders where appropriate.
 
-This page documents the **reasoning, evidence, exploitation chain, root cause, and defensive lessons** rather than publishing the challenge answer as an answer key.
+This documentation emphasizes technical reasoning, evidence, vulnerability chaining, root cause, and defensive recommendations rather than publishing the challenge flag as an answer key.
 
 </div>
 
-## 🎯 Challenge at a Glance
+## Navigation
 
-<div class="metric-grid">
-<div class="metric"><strong>Day 10</strong><span>Hacker Holidays 2026</span></div>
-<div class="metric"><strong>Web</strong><span>Challenge category</span></div>
-<div class="metric"><strong>Medium</strong><span>Room difficulty</span></div>
-<div class="metric"><strong>Zip Slip</strong><span>Primary weakness</span></div>
-<div class="metric"><strong>File Write</strong><span>Core primitive</span></div>
-<div class="metric"><strong>RCE</strong><span>Final impact</span></div>
+<div class="ctf-toc">
+<div class="ctf-toc-title">Documentation Map</div>
+<ul>
+<li><a href="#mission">Mission and Executive Summary</a></li>
+<li><a href="#quick-overview">Quick Overview</a></li>
+<li><a href="#target-information">Target and Lab Information</a></li>
+<li><a href="#attack-path">Attack Path</a></li>
+<li><a href="#evidence-gallery">Evidence Gallery</a></li>
+<li><a href="#room-overview">Room Overview</a></li>
+<li><a href="#reconnaissance">Reconnaissance</a></li>
+<li><a href="#upload-endpoint">Upload Endpoint Discovery</a></li>
+<li><a href="#source-disclosure">Source Disclosure</a></li>
+<li><a href="#dashboard-enumeration">Dashboard Enumeration</a></li>
+<li><a href="#baseline-upload">Baseline Upload</a></li>
+<li><a href="#zip-slip">Zip Slip Discovery</a></li>
+<li><a href="#arbitrary-file-write">Arbitrary File Write</a></li>
+<li><a href="#worker-hook">Worker Hook Analysis</a></li>
+<li><a href="#payload-archive">Payload Archive</a></li>
+<li><a href="#shell-and-objective">Shell Access and Objective</a></li>
+<li><a href="#technical-analysis">Technical Analysis</a></li>
+<li><a href="#exploitation-chain">Exploitation Chain</a></li>
+<li><a href="#methodology">Investigation Methodology</a></li>
+<li><a href="#root-cause">Root Cause Analysis</a></li>
+<li><a href="#security-findings">Security Findings and Impact</a></li>
+<li><a href="#remediation">Security Recommendations</a></li>
+<li><a href="#detection">Detection Opportunities</a></li>
+<li><a href="#lessons-learned">Lessons Learned</a></li>
+<li><a href="#skills-and-tools">Skills and Tools</a></li>
+<li><a href="#repository-structure">Evidence and Repository Structure</a></li>
+<li><a href="#related-documentation">Related Documentation</a></li>
+<li><a href="#flag-policy">Flag Policy</a></li>
+<li><a href="#responsible-use">Responsible Use</a></li>
+<li><a href="#references">References</a></li>
+<li><a href="#author">Author</a></li>
+</ul>
 </div>
 
-| Property | Value |
+---
+
+## Mission and Executive Summary
+
+<a id="mission"></a>
+
+The objective of **The Hollow Shell** is to investigate a web application that accepts uploaded ZIP-based shell packages and identify a path to the challenge flag.
+
+The documented investigation follows a chain of weaknesses involving client-side source disclosure, unsafe archive extraction, arbitrary file writing, and a background worker that processes automation hooks.
+
+The application initially presents a conventional upload workflow. However, the investigation establishes that archive member paths are not adequately constrained to the intended extraction directory. This creates a Zip Slip vulnerability that can be used to write files outside the expected location.
+
+The dashboard's reference to automation hooks and a theme worker reveals a potential trust-boundary issue: files written through the upload mechanism may reach a trusted automated consumer.
+
+The documented exploitation sequence culminates in shell access as `roomservice`. The final flag remains intentionally redacted.
+
+### Investigation objectives
+
+- Enumerate the exposed network services.
+- Identify the web application's upload endpoint and supported HTTP method.
+- Inspect client-delivered source for information disclosure.
+- Understand the authenticated shell-upload workflow.
+- Investigate ZIP extraction behavior and validate path traversal.
+- Establish arbitrary file write through controlled evidence.
+- Analyze the relationship between filesystem writes and background-worker processing.
+- Document the resulting shell context and challenge objective.
+- Explain the root cause, impact, detection opportunities, and defensive controls.
+
+### Key finding
+
+<div class="key-finding">
+  <div class="key-finding-title">Primary Security Finding</div>
+
+  Insufficient validation of archive member paths allows ZIP extraction to escape its intended directory. When this file-write primitive intersects with a trusted worker that processes attacker-influenced content, the impact can escalate from arbitrary file placement to code execution.
+</div>
+
+## Quick Overview
+
+<a id="quick-overview"></a>
+
+<div class="ctf-card-grid">
+
+  <div class="ctf-card">
+    <div class="ctf-card-title">Platform</div>
+    <div class="ctf-card-value">TryHackMe</div>
+  </div>
+
+  <div class="ctf-card">
+    <div class="ctf-card-title">Challenge</div>
+    <div class="ctf-card-value">The Hollow Shell</div>
+  </div>
+
+  <div class="ctf-card">
+    <div class="ctf-card-title">Event</div>
+    <div class="ctf-card-value">Hacker Holidays 2026 · Day 10</div>
+  </div>
+
+  <div class="ctf-card">
+    <div class="ctf-card-title">Difficulty</div>
+    <div class="ctf-card-value">Medium</div>
+  </div>
+
+  <div class="ctf-card">
+    <div class="ctf-card-title">Primary Weakness</div>
+    <div class="ctf-card-value">Zip Slip / Path Traversal</div>
+  </div>
+
+  <div class="ctf-card">
+    <div class="ctf-card-title">Core Primitive</div>
+    <div class="ctf-card-value">Arbitrary File Write</div>
+  </div>
+
+  <div class="ctf-card">
+    <div class="ctf-card-title">Execution Context</div>
+    <div class="ctf-card-value">Background Worker</div>
+  </div>
+
+  <div class="ctf-card">
+    <div class="ctf-card-title">Documented Outcome</div>
+    <div class="ctf-card-value">Shell as roomservice</div>
+  </div>
+
+</div>
+
+## Target and Lab Information
+
+<a id="target-information"></a>
+
+| Property | Documented value |
 |---|---|
-| **Platform** | TryHackMe |
-| **Room** | The Hollow Shell |
-| **Event** | Hacker Holidays 2026 |
-| **Day** | 10 |
-| **Category** | Web |
-| **Difficulty** | Medium |
-| **Primary weakness** | Zip Slip / Path Traversal |
-| **Core impact** | Arbitrary File Write |
-| **Execution mechanism** | Background worker / hook processing |
-| **Shell context** | `roomservice` |
-| **Objective** | `/home/roomservice/flag.txt` |
-| **Flag** | 🔒 Redacted |
+| Platform | TryHackMe |
+| Room | The Hollow Shell |
+| Event | Hacker Holidays 2026 |
+| Day | 10 |
+| Category | Web |
+| Difficulty | Medium |
+| Application | Byte Lotus Shoreline Display portal |
+| Initial network services | SSH and web application |
+| SSH port | TCP/22 |
+| Web application port | TCP/5000 |
+| Discovered endpoint | `/upload` |
+| Upload format | ZIP archive containing a shell manifest |
+| Expected manifest | `shell.json` |
+| Primary weakness | Zip Slip / path traversal |
+| Core impact | Arbitrary file write |
+| Execution mechanism | Background worker / automation-hook processing |
+| Shell context | `roomservice` |
+| Objective | `/home/roomservice/flag.txt` |
+| Flag | Intentionally redacted |
 
-The official room describes the challenge as a web task in which a hotel display portal accepts uploaded “shell” packages and asks the player to find the flag. citeturn0search1
+The original room documentation identifies the challenge as a Medium-difficulty web task in the Hacker Holidays 2026 sequence.
 
----
+**Scope note:** The target IP address is represented as `TARGET_IP` in the commands below. No specific target address is asserted in this public portfolio edition.
 
-# 🧭 Executive Summary
+## Attack Path
 
-The Hollow Shell is a strong example of **vulnerability chaining**.
+<a id="attack-path"></a>
 
-The initial application appears to provide a conventional ZIP upload feature. Investigation reveals that the portal:
+The following diagram summarizes the documented investigation from initial enumeration to the challenge objective.
 
-1. exposes a web application on TCP/5000;
-2. contains a discoverable `/upload` endpoint;
-3. returns `405 Method Not Allowed` when queried with the wrong method;
-4. exposes lab staff credentials in page source;
-5. provides an authenticated ZIP upload interface;
-6. extracts attacker-controlled archive members;
-7. fails to enforce a safe extraction boundary;
-8. allows a Zip Slip traversal to become an arbitrary file write;
-9. exposes a background-worker / automation-hook trust boundary;
-10. allows the file-write primitive to reach an execution-relevant location;
-11. ultimately provides shell access as `roomservice`.
+<div class="attack-chain">
+  <div class="attack-step">Reconnaissance</div>
+  <div class="attack-arrow">→</div>
+  <div class="attack-step">Web Enumeration</div>
+  <div class="attack-arrow">→</div>
+  <div class="attack-step">Source Disclosure</div>
+  <div class="attack-arrow">→</div>
+  <div class="attack-step">Authenticated Upload</div>
+  <div class="attack-arrow">→</div>
+  <div class="attack-step">Zip Slip</div>
+  <div class="attack-arrow">→</div>
+  <div class="attack-step">Arbitrary File Write</div>
+  <div class="attack-arrow">→</div>
+  <div class="attack-step">Worker Hook</div>
+  <div class="attack-arrow">→</div>
+  <div class="attack-step">Shell Access</div>
+  <div class="attack-arrow">→</div>
+  <div class="attack-step">Flag Objective</div>
+</div>
 
-The security lesson is larger than the individual vulnerability:
-
-> **An arbitrary file-write primitive becomes significantly more dangerous when attacker-controlled files can reach a trusted automated consumer.**
-
----
-
-# 🗺️ Attack Path
-
-<div class="chain">
+The principal architectural relationship is:
 
 ```text
-┌───────────────────────────┐
-│  01  Reconnaissance       │
-│  Nmap → 22 / 5000         │
-└─────────────┬─────────────┘
-              │
-              ▼
-┌───────────────────────────┐
-│  02  Web Enumeration      │
-│  /upload → HTTP 405       │
-└─────────────┬─────────────┘
-              │
-              ▼
-┌───────────────────────────┐
-│  03  Source Inspection    │
-│  Lab credential disclosed │
-└─────────────┬─────────────┘
-              │
-              ▼
-┌───────────────────────────┐
-│  04  Staff Dashboard      │
-│  ZIP + worker clue        │
-└─────────────┬─────────────┘
-              │
-              ▼
-┌───────────────────────────┐
-│  05  Baseline Upload      │
-│  shells/<random-id>/      │
-└─────────────┬─────────────┘
-              │
-              ▼
-┌───────────────────────────┐
-│  06  Zip Slip             │
-│  Path traversal           │
-└─────────────┬─────────────┘
-              │
-              ▼
-┌───────────────────────────┐
-│  07  Arbitrary File Write │
-│  Marker + static proof    │
-└─────────────┬─────────────┘
-              │
-              ▼
-┌───────────────────────────┐
-│  08  Worker Hook          │
-│  Trusted consumer         │
-└─────────────┬─────────────┘
-              │
-              ▼
-┌───────────────────────────┐
-│  09  Controlled Callback  │
-│  Worker-mediated exec     │
-└─────────────┬─────────────┘
-              │
-              ▼
-┌───────────────────────────┐
-│  10  Reverse Shell        │
-│  roomservice              │
-└─────────────┬─────────────┘
-              │
-              ▼
-┌───────────────────────────┐
-│  11  Objective            │
-│  flag.txt — REDACTED      │
-└───────────────────────────┘
+Untrusted ZIP archive
+        |
+        v
+Unsafe extraction
+        |
+        v
+Arbitrary file write
+        |
+        v
+Worker-controlled location
+        |
+        v
+Automated processing
+        |
+        v
+Code execution
+        |
+        v
+Shell as roomservice
 ```
 
-</div>
+The sequence illustrates why upload security must consider not only file validation, but also filesystem boundaries, downstream consumers, and process privileges.
 
----
+## Evidence Gallery
 
-# 🖼️ Evidence Gallery
+<a id="evidence-gallery"></a>
 
-The portfolio intentionally uses **11 major evidence assets**. Each image represents a meaningful stage of the investigation rather than repetitive command output.
+The original documentation identifies 11 SVG evidence assets. Their filenames and relative paths are preserved.
 
-| # | Evidence | What it proves |
+| # | Evidence asset | Purpose |
 |---:|---|---|
-| 01 | Room overview | Scope and challenge context |
-| 02 | Nmap | Exposed network services |
-| 03 | Upload method | POST-only `/upload` clue |
-| 04 | Source disclosure | Lab credential discovery |
-| 05 | Dashboard | ZIP workflow and worker clue |
-| 06 | Test upload | Normal extraction behavior |
-| 07 | Zip Slip marker | Traversal confirmed |
-| 08 | Static proof | Arbitrary file write confirmed |
-| 09 | Hook placement | Worker execution path |
-| 10 | Payload archive | Final archive structure |
-| 11 | Shell / objective | Post-exploitation evidence |
+| 01 | `assets/01-cover.svg` | Challenge overview and context |
+| 02 | `assets/02-recon-nmap.svg` | Exposed network services |
+| 03 | `assets/03-upload-method.svg` | Upload endpoint and HTTP 405 response |
+| 04 | `assets/04-source-disclosure.svg` | Client-visible credential disclosure |
+| 05 | `assets/05-dashboard-upload.svg` | Authenticated upload interface and worker clue |
+| 06 | `assets/06-test-upload.svg` | Baseline upload behavior |
+| 07 | `assets/07-zipslip-marker.svg` | Harmless traversal-marker validation |
+| 08 | `assets/08-zipslip-static-proof.svg` | Static-file evidence of arbitrary file write |
+| 09 | `assets/09-hook-write.svg` | Worker-hook placement evidence |
+| 10 | `assets/10-payload-archive.svg` | Final archive structure |
+| 11 | `assets/11-shell-flag-redacted.svg` | Shell context and redacted objective output |
 
----
+The figures below retain the original asset paths. They are presented as evidence of the documented investigation, not as independently re-verified artifacts.
 
-# 01 — Room Overview
+## Room Overview
 
-<figure class="evidence">
+<a id="room-overview"></a>
 
-<img src="assets/01-cover.svg" alt="The Hollow Shell TryHackMe room overview">
-
-<figcaption><strong>Figure 01.</strong> Challenge scope and exploitation theme.</figcaption>
-
+<figure>
+  <img src="assets/01-cover.svg" alt="The Hollow Shell TryHackMe challenge overview">
+  <figcaption>Figure 01 — Challenge identity, scope, and exploitation theme.</figcaption>
 </figure>
 
-The room belongs to the **Hacker Holidays 2026** sequence and is categorized as a **Medium Web** challenge. The official room identifies the objective simply as finding the flag. citeturn0search1
+The challenge centers on the Byte Lotus hotel's Shoreline Display portal. The application accepts uploaded shell packages and provides clues about how uploaded content is processed.
 
-The central application is the Byte Lotus hotel's **Shoreline Display** portal.
+The investigation focuses on the security implications of the upload and extraction pipeline rather than treating the final shell as the only meaningful outcome.
 
----
+## Reconnaissance
 
-# 02 — Reconnaissance
+<a id="reconnaissance"></a>
 
-## Service Discovery
+### Service discovery
 
-The first step is to establish the exposed attack surface.
+The initial step is to identify the network services exposed by the target.
 
 ```bash
 nmap TARGET_IP
 ```
 
-The important services are:
+The documented scan identifies the following services:
 
-```text
-22/tcp    open    ssh
-5000/tcp  open    web application
-```
+| Port | Service | Observation |
+|---:|---|---|
+| 22/tcp | SSH | Open |
+| 5000/tcp | Web application | Open |
 
-<figure class="evidence">
-
-<img src="assets/02-recon-nmap.svg" alt="Nmap reconnaissance showing ports 22 and 5000">
-
-<figcaption><strong>Figure 02.</strong> Initial service enumeration.</figcaption>
-
+<figure>
+  <img src="assets/02-recon-nmap.svg" alt="Nmap reconnaissance showing TCP ports 22 and 5000">
+  <figcaption>Figure 02 — Initial service enumeration.</figcaption>
 </figure>
 
-The application on TCP/5000 becomes the primary target.
+**What the command does:** Nmap probes the specified target to identify reachable network services.
 
-### Analyst observation
+**Why it was used:** Establishing the exposed attack surface helps prioritize further investigation.
 
-The presence of SSH is useful reconnaissance information, but it is not required for the main exploitation chain documented here.
+**What it revealed:** SSH and a web application were accessible on the documented ports.
 
----
+**Why it matters:** TCP/5000 becomes the primary focus because the challenge's upload workflow is exposed through the web application.
 
-# 03 — Discovering the Upload Endpoint
+The presence of SSH is relevant reconnaissance information, but the documented exploitation chain does not require SSH as the initial access mechanism.
+
+## Upload Endpoint Discovery
+
+<a id="upload-endpoint"></a>
 
 Web-content enumeration identifies an interesting route:
 
@@ -352,111 +314,83 @@ Web-content enumeration identifies an interesting route:
 /upload
 ```
 
-Requesting it directly with `GET` produces:
+A direct request using `GET` produces:
 
 ```text
 405 Method Not Allowed
 ```
 
-<figure class="evidence">
-
-<img src="assets/03-upload-method.svg" alt="Upload endpoint returning HTTP 405">
-
-<figcaption><strong>Figure 03.</strong> HTTP method analysis reveals a POST-only upload surface.</figcaption>
-
+<figure>
+  <img src="assets/03-upload-method.svg" alt="Upload endpoint returning HTTP 405 Method Not Allowed">
+  <figcaption>Figure 03 — HTTP method analysis reveals a route that rejects the requested method.</figcaption>
 </figure>
 
-A `405` is valuable because it indicates that the route exists but does not accept the method used.
+### Interpreting the response
 
-Conceptually:
+An HTTP `405 Method Not Allowed` response indicates that the server does not permit the requested HTTP method for the identified resource.
 
-```text
-404
-└── resource not found
+This differs from a `404 Not Found` response, which indicates that the server could not find the requested resource or is not disclosing its existence.
 
-405
-└── resource exists
-    └── requested HTTP method rejected
-```
+In this investigation, the response provides a useful lead: `/upload` is associated with an upload workflow, and the method used for the initial request is not accepted.
 
-This points toward a likely upload `POST` endpoint.
+The response alone does not prove every detail of the endpoint's behavior. The subsequent application analysis provides the context for identifying the upload functionality.
 
----
+## Source Disclosure
 
-# 04 — Source Disclosure
+<a id="source-disclosure"></a>
 
-The login page source contains a lab-specific HTML comment exposing the initial staff credential.
+Inspection of the login page source reveals a lab-specific HTML comment containing the initial staff credential.
 
-<figure class="evidence">
-
-<img src="assets/04-source-disclosure.svg" alt="Login page source showing lab credential disclosure">
-
-<figcaption><strong>Figure 04.</strong> Client-visible source exposes the challenge's seeded staff credential.</figcaption>
-
+<figure>
+  <img src="assets/04-source-disclosure.svg" alt="Login page source showing the lab credential disclosure">
+  <figcaption>Figure 04 — Client-visible source exposes the seeded staff credential.</figcaption>
 </figure>
 
-The lab credential used during the investigation is:
+The credential documented in the original investigation is:
 
 ```text
 concierge : StayNoticed2024!
 ```
 
+The credential is preserved because it is part of the original challenge evidence.
+
 ### Security significance
 
-Anything delivered to the browser should be considered visible to the client.
+HTML comments are not a secure location for secrets. A browser receives the page source and can expose its contents through developer tools or source inspection.
 
-That includes:
+The same principle applies to:
 
-- HTML comments;
-- JavaScript;
-- hidden fields;
-- source maps;
-- debug information;
-- embedded configuration.
+- JavaScript delivered to the client.
+- Hidden HTML fields.
+- Embedded application configuration.
+- Debug output.
+- Source maps containing sensitive implementation details.
 
-Secrets should remain server-side.
+**Finding:** A credential embedded in client-delivered source can disclose authentication material to anyone able to retrieve that source.
 
----
+**Defensive lesson:** Credentials, API secrets, and other authentication material must remain on the server side. Removing a secret from the visible page interface is insufficient if the value remains in the delivered source.
 
-# 05 — Shoreline Display Dashboard
+## Dashboard Enumeration
 
-Authentication exposes the Shoreline Display staff interface.
+<a id="dashboard-enumeration"></a>
 
-<figure class="evidence">
+Authentication exposes the Shoreline Display staff dashboard.
 
-<img src="assets/05-dashboard-upload.svg" alt="Shoreline Display dashboard with ZIP upload functionality">
-
-<figcaption><strong>Figure 05.</strong> Authenticated ZIP upload functionality and the background-worker clue.</figcaption>
-
+<figure>
+  <img src="assets/05-dashboard-upload.svg" alt="Shoreline Display staff dashboard showing ZIP upload functionality">
+  <figcaption>Figure 05 — Authenticated upload interface and background-worker clue.</figcaption>
 </figure>
 
-The application expects uploaded shells to contain:
+The dashboard provides two important pieces of architectural information:
 
-```text
-shell.json
-```
+1. Uploaded shells are expected to contain a manifest named `shell.json`.
+2. Shell packages may contain automation hooks that are processed by a theme worker.
 
-It also states that shells may contain:
+These details establish a relationship between the upload functionality and a downstream automated processing component.
 
-```text
-automation hooks
-```
+### Manifest format
 
-which are applied by a:
-
-```text
-theme worker
-```
-
-This becomes the most important architectural clue in the room.
-
----
-
-# 06 — Establishing Normal Upload Behavior
-
-Before testing the extraction boundary, a normal ZIP is uploaded.
-
-The manifest follows the expected structure:
+The documented baseline manifest is:
 
 ```json
 {
@@ -465,145 +399,203 @@ The manifest follows the expected structure:
 }
 ```
 
-<figure class="evidence">
+The manifest represents the expected shell-package structure used in the investigation.
 
-<img src="assets/06-test-upload.svg" alt="Normal shell ZIP upload">
+### Worker trust boundary
 
-<figcaption><strong>Figure 06.</strong> Baseline shell upload and application storage behavior.</figcaption>
+The reference to automation hooks is particularly important because a background worker may have filesystem access or execution capabilities beyond those available to an ordinary static-file handler.
 
+If untrusted uploaded content can influence what the worker processes, the application must enforce a strict boundary between user-supplied data and trusted executable content.
+
+The dashboard's wording is an investigative clue. The vulnerability and execution chain are documented in the subsequent stages.
+
+## Baseline Upload
+
+<a id="baseline-upload"></a>
+
+Before investigating the extraction boundary, the original workflow establishes normal upload behavior with a benign ZIP archive.
+
+<figure>
+  <img src="assets/06-test-upload.svg" alt="Baseline shell ZIP upload and application storage behavior">
+  <figcaption>Figure 06 — Normal shell upload establishes the expected application behavior.</figcaption>
 </figure>
 
-The application stores the uploaded shell below a per-upload directory similar to:
+The application stores uploaded shells beneath a per-upload directory similar to:
 
 ```text
 /shells/<random-id>/
 ```
 
-This gives us an expected filesystem boundary.
+This provides an expected filesystem boundary for subsequent validation.
 
----
+### Why establish a baseline?
 
-# 07 — Zip Slip Discovery
+A baseline distinguishes normal application behavior from behavior introduced by a malformed or adversarial archive.
 
-## The Vulnerability
+The comparison provides a structured investigation:
 
-The archive extraction behavior does not adequately constrain attacker-controlled member paths.
+1. Observe the expected upload format.
+2. Identify the expected extraction location.
+3. Inspect how archive member paths are handled.
+4. Determine whether a member can escape the intended directory.
+5. Validate the resulting impact using controlled evidence.
 
-A traversal entry such as:
+The baseline is important because a successful upload alone does not establish the presence of a vulnerability.
+
+## Zip Slip Discovery
+
+<a id="zip-slip"></a>
+
+### Vulnerability overview
+
+Zip Slip is a path-traversal vulnerability involving archive extraction. It occurs when an application accepts archive member paths without adequately constraining their resolved destinations to the intended extraction directory.
+
+A traversal-bearing filename such as:
 
 ```text
 ../marker.txt
 ```
 
-can escape the intended extraction directory.
+can refer to a location outside the expected directory when path components are resolved.
 
-<figure class="evidence">
-
-<img src="assets/07-zipslip-marker.svg" alt="Zip Slip traversal marker proof">
-
-<figcaption><strong>Figure 07.</strong> Harmless traversal confirms that archive members can escape their expected extraction directory.</figcaption>
-
+<figure>
+  <img src="assets/07-zipslip-marker.svg" alt="Harmless traversal marker used to validate the archive extraction boundary">
+  <figcaption>Figure 07 — Marker-based evidence of archive traversal beyond the expected directory.</figcaption>
 </figure>
 
-### Security model
+### Filesystem boundary model
+
+Consider the intended extraction directory:
 
 ```text
-Expected:
+/shells/abc123/
+```
 
+A normal archive member might resolve to:
+
+```text
 /shells/abc123/file.txt
+```
 
+A traversal-bearing member might instead resolve to:
 
-Traversal:
-
+```text
 /shells/abc123/../marker.txt
+```
 
+After path normalization, the destination is:
 
-Resolved:
-
+```text
 /shells/marker.txt
 ```
 
-This confirms the presence of a **Zip Slip / path traversal** condition.
+The resulting path lies outside the original per-upload directory.
 
----
+The exact destination depends on the extraction root and the archive member path. These examples illustrate the path-resolution issue documented in the investigation.
 
-# 08 — Arbitrary File Write Proof
+### Why this matters
 
-A second validation places a controlled static asset outside the shell directory.
+An archive filename is untrusted input. The extraction process must not assume that a member belongs inside the upload directory simply because it appears in the archive.
 
-The purpose is to prove that the vulnerability provides more than a cosmetic path anomaly.
+**Finding:** The documented marker test confirms that archive extraction can escape its intended directory.
 
-<figure class="evidence">
+The marker-based test establishes the traversal behavior before the investigation proceeds to stronger evidence of file-write impact.
 
-<img src="assets/08-zipslip-static-proof.svg" alt="Static file write confirmation">
+## Arbitrary File Write
 
-<figcaption><strong>Figure 08.</strong> Browser-readable static content confirms arbitrary file write.</figcaption>
+<a id="arbitrary-file-write"></a>
 
+A second validation demonstrates that the traversal weakness can place a controlled static asset outside the expected shell directory.
+
+<figure>
+  <img src="assets/08-zipslip-static-proof.svg" alt="Static-file evidence demonstrating arbitrary file write">
+  <figcaption>Figure 08 — Static content provides evidence of a file written outside the expected extraction boundary.</figcaption>
 </figure>
 
-The resulting chain is:
+The documented sequence is:
 
 ```text
 Attacker-controlled ZIP
-          ↓
-Traversal-bearing filename
-          ↓
+          |
+          v
+Traversal-bearing archive member
+          |
+          v
 Unsafe extraction
-          ↓
-Filesystem boundary bypass
-          ↓
+          |
+          v
+Extraction-boundary bypass
+          |
+          v
 Arbitrary file write
-          ↓
+          |
+          v
 Browser-readable artifact
 ```
 
-This staged validation is important because it proves the primitive independently before attempting to turn it into code execution.
+### Why the second validation matters
 
----
+A traversal-looking filename is not, by itself, proof that a write occurred outside the extraction root. The resulting filesystem artifact provides stronger evidence of the actual impact.
 
-# 09 — Identifying the Worker Hook
+This staged validation distinguishes the vulnerable path-handling behavior from the resulting write primitive.
 
-The dashboard's mention of automation hooks provides the next lead.
+### Security impact
 
-<figure class="evidence">
+The application is no longer limited to placing uploaded files inside the intended shell directory. Depending on the application process's filesystem permissions, the same primitive may affect other writable locations.
 
-<img src="assets/09-hook-write.svg" alt="Worker hook file placement">
+The finding does not imply that every path on the host is writable. The effective impact remains constrained by operating-system permissions and the application's execution context.
 
-<figcaption><strong>Figure 09.</strong> Traversal reaches the worker-controlled hook location.</figcaption>
+## Worker Hook Analysis
 
+<a id="worker-hook"></a>
+
+The dashboard's automation-hook description provides the next investigative lead.
+
+<figure>
+  <img src="assets/09-hook-write.svg" alt="Evidence of a controlled file reaching the worker hook location">
+  <figcaption>Figure 09 — Evidence associated with the worker-controlled hook location.</figcaption>
 </figure>
 
-The exploitation hypothesis becomes:
+The exploitation hypothesis is that the archive traversal primitive can place a controlled file where the background worker processes automation hooks.
+
+The documented relationship is:
 
 ```text
 Zip Slip
-   ↓
-Write controlled file
-   ↓
-Place file in worker hook location
-   ↓
+   |
+   v
+Controlled file placement
+   |
+   v
+Worker hook location
+   |
+   v
 Worker processes hook
-   ↓
-Controlled execution
+   |
+   v
+Execution impact
 ```
 
-This is where the impact of the arbitrary-write vulnerability increases substantially.
+### Why the worker matters
 
----
+An arbitrary file write is a filesystem primitive. It does not automatically mean remote code execution.
 
-# 10 — Payload Archive
+The impact increases when a separate trusted component consumes the written file as executable content or otherwise interprets it in a security-sensitive way.
 
-The final controlled archive contains the required manifest and the callback under the traversal path.
+The worker introduces this second boundary. If it processes attacker-controlled source files without sufficient validation or isolation, the upload vulnerability can become an execution path.
 
-<figure class="evidence">
+## Payload Archive
 
-<img src="assets/10-payload-archive.svg" alt="Final reverse-shell ZIP archive structure">
+<a id="payload-archive"></a>
 
-<figcaption><strong>Figure 10.</strong> Final archive structure used to reach the worker-controlled callback location.</figcaption>
+The original investigation documents a final ZIP archive containing the expected manifest and a callback file intended for the worker-controlled location.
 
+<figure>
+  <img src="assets/10-payload-archive.svg" alt="Final ZIP archive structure documented for the worker-mediated execution chain">
+  <figcaption>Figure 10 — Archive structure associated with the documented execution chain.</figcaption>
 </figure>
 
-Conceptually:
+The conceptual archive structure is:
 
 ```text
 reverse-shell.zip
@@ -611,21 +603,27 @@ reverse-shell.zip
 └── ../../hooks/callback.py
 ```
 
-For public documentation, the callback address is represented as:
+This is the structure documented in the original write-up. The actual destination depends on the application's extraction root and the worker's hook location.
+
+The callback address is represented by the placeholder:
 
 ```text
 YOUR_ATTACKER_IP
 ```
 
-The important operational rule is:
+### Operational considerations
 
-> Build the archive only after the callback address has been correctly configured.
+The original documentation emphasizes configuring the callback address before preparing the archive.
 
----
+For security analysis, the significant point is not the callback address itself. It is the interaction between the archive extraction vulnerability and the worker's handling of the resulting file.
 
-# 11 — Shell Access & Objective
+The public portfolio retains the documented archive structure and execution reasoning without claiming additional payload details or environmental configuration that were not included in the source material.
 
-The worker processes the planted callback and the listener receives a shell in the application context.
+## Shell Access and Objective
+
+<a id="shell-and-objective"></a>
+
+The documented investigation reports that the worker processes the planted callback and a listener receives a shell in the application context.
 
 The resulting user is:
 
@@ -639,376 +637,454 @@ The challenge objective is located at:
 /home/roomservice/flag.txt
 ```
 
-<figure class="evidence">
-
-<img src="assets/11-shell-flag-redacted.svg" alt="Reverse shell with flag output redacted">
-
-<figcaption><strong>Figure 11.</strong> Post-exploitation shell evidence. The final flag output is intentionally redacted.</figcaption>
-
+<figure>
+  <img src="assets/11-shell-flag-redacted.svg" alt="Reverse-shell evidence with challenge flag output redacted">
+  <figcaption>Figure 11 — Documented post-exploitation context. The final flag output remains intentionally redacted.</figcaption>
 </figure>
 
-The public portfolio version deliberately does **not** display the flag.
+The public documentation preserves the user context and objective path while omitting the final flag value.
 
----
+### Result
 
-# 🔬 Technical Analysis
+The documented outcome demonstrates how an upload feature can become a remote-code-execution path when multiple weaknesses interact:
 
-## Zip Slip
+- A client-visible credential disclosure assists authentication.
+- Unsafe archive extraction permits traversal outside the intended directory.
+- The resulting arbitrary file-write primitive reaches a worker-controlled location.
+- The worker processes attacker-influenced content.
+- The chain culminates in shell access as `roomservice`.
 
-Zip Slip occurs when archive member paths are trusted as safe filesystem paths.
+The final flag remains excluded from this portfolio edition.
 
-The dangerous pattern is:
+## Technical Analysis
+
+<a id="technical-analysis"></a>
+
+### 1. Zip Slip
+
+Zip Slip occurs when an archive extractor trusts member paths without ensuring that the final resolved destination remains inside the permitted extraction root.
+
+The vulnerable conceptual flow is:
 
 ```text
-Extraction Root
+Extraction root
       +
-Untrusted Archive Filename
-      ↓
-Destination Path
+Untrusted archive filename
+      |
+      v
+Destination path
+      |
+      v
+Filesystem write
 ```
 
-without canonicalizing and validating the final destination.
+If the application does not validate the canonical destination, traversal components can redirect the write outside the expected directory.
 
-A secure extractor must ensure:
+A secure extractor should enforce the invariant:
 
 ```text
-canonical(destination) ∈ extraction_root
+canonical(destination) is contained within extraction_root
 ```
 
-before writing.
+This validation must be applied before writing each archive member.
 
----
+It should also account for platform-specific path separators, absolute paths, symbolic links, and filesystem behavior that could undermine a simple string-prefix check.
 
-## Arbitrary File Write
+### 2. Arbitrary File Write
 
-The Zip Slip vulnerability transforms the upload feature into an arbitrary file-write primitive.
+The Zip Slip weakness changes the security properties of the upload feature.
 
-The security boundary changes from:
+The intended capability is:
 
 ```text
-"User can upload a shell"
+User can upload a shell package.
 ```
 
-to:
+The documented vulnerable behavior becomes:
 
 ```text
-"User can influence arbitrary writable filesystem locations"
+User can influence filesystem destinations
+outside the intended extraction directory.
 ```
 
-subject to the permissions of the application process.
+The effective scope depends on the permissions of the process performing extraction.
 
----
+This distinction matters because an arbitrary file-write primitive can affect application configuration, worker inputs, or other sensitive locations if those locations are writable by the vulnerable process.
 
-## Worker-Mediated Execution
+### 3. Worker-Mediated Execution
 
-The dashboard's automation-worker functionality creates a second trust boundary.
-
-The application effectively has:
+The background worker introduces a downstream trust boundary:
 
 ```text
-Untrusted Input
-      ↓
+Untrusted upload
+      |
+      v
 Filesystem
-      ↓
-Trusted Worker
+      |
+      v
+Trusted worker
 ```
 
-If the worker processes attacker-controlled source files, a filesystem-write primitive can become code execution.
+If the worker interprets attacker-controlled source files as executable hooks, a file-write primitive can become code execution.
 
----
+The primary design failure is the combination of insufficient filesystem confinement and unsafe downstream processing. Fixing only the upload interface would not necessarily address the worker's independent trust assumptions.
 
-# 🧩 Exploitation Chain
+### 4. Credential Disclosure
+
+The login page source contains the documented lab credential:
 
 ```text
-Source Disclosure
-       │
-       ▼
-Authenticated Access
-       │
-       ▼
-ZIP Upload
-       │
-       ▼
-Unsafe Archive Extraction
-       │
-       ▼
-Zip Slip
-       │
-       ▼
-Arbitrary File Write
-       │
-       ▼
-Worker Hook Location
-       │
-       ▼
-Worker Processes Callback
-       │
-       ▼
-Code Execution
-       │
-       ▼
-Reverse Shell
-       │
-       ▼
-roomservice
+concierge : StayNoticed2024!
 ```
 
-The critical relationship is:
+The disclosure is a separate security issue from Zip Slip. It reduces the protection provided by the authentication boundary because the credential is available in client-delivered content.
+
+The appropriate fix is to remove the secret from the page source and rotate the affected credential where necessary.
+
+### 5. Vulnerability Chaining
+
+The impact of the challenge comes from the interaction between multiple weaknesses rather than from the ZIP extraction flaw in isolation.
 
 ```text
-File Write
-    +
-Trusted Automated Consumer
-    =
-Code Execution
+Credential disclosure
+        |
+        v
+Authenticated application access
+        |
+        v
+ZIP upload
+        |
+        v
+Unsafe extraction
+        |
+        v
+Arbitrary file write
+        |
+        v
+Worker hook processing
+        |
+        v
+Code execution
+        |
+        v
+Shell access
 ```
 
----
+The key distinction is between an individual weakness and the complete attack path. The arbitrary file write becomes substantially more serious because a trusted automated component can consume the resulting file.
 
-# 🧪 Investigation Methodology
+## Exploitation Chain
 
-The room is best understood as a sequence of progressively stronger proofs.
+<a id="exploitation-chain"></a>
+
+<div class="attack-chain">
+  <div class="attack-step">Source Disclosure</div>
+  <div class="attack-arrow">→</div>
+  <div class="attack-step">Authenticated Access</div>
+  <div class="attack-arrow">→</div>
+  <div class="attack-step">ZIP Upload</div>
+  <div class="attack-arrow">→</div>
+  <div class="attack-step">Unsafe Extraction</div>
+  <div class="attack-arrow">→</div>
+  <div class="attack-step">Zip Slip</div>
+  <div class="attack-arrow">→</div>
+  <div class="attack-step">Arbitrary Write</div>
+  <div class="attack-arrow">→</div>
+  <div class="attack-step">Worker Processing</div>
+  <div class="attack-arrow">→</div>
+  <div class="attack-step">Code Execution</div>
+  <div class="attack-arrow">→</div>
+  <div class="attack-step">roomservice</div>
+</div>
+
+The documented chain highlights three distinct security boundaries:
+
+1. **Authentication boundary:** Client-visible credentials undermine the intended secrecy of the login process.
+2. **Filesystem boundary:** Unsafe archive extraction allows a write outside the intended directory.
+3. **Execution boundary:** The worker processes attacker-influenced content in a trusted context.
+
+A complete remediation strategy must address all three boundaries.
+
+## Investigation Methodology
+
+<a id="methodology"></a>
+
+The investigation is best understood as a sequence of increasingly strong validations.
 
 ### Stage 1 — Discover
 
-```text
-Find services
-Find web routes
-Find authentication surface
-```
+- Identify exposed network services.
+- Find the web application and interesting routes.
+- Investigate the upload endpoint's HTTP method behavior.
+- Identify the authentication surface.
 
 ### Stage 2 — Understand
 
-```text
-Inspect source
-Authenticate
-Read application hints
-Map upload behavior
-```
+- Inspect client-visible source.
+- Identify the documented lab credential.
+- Authenticate to the staff dashboard.
+- Read the manifest requirements and worker-related hints.
+- Establish the expected upload directory.
 
 ### Stage 3 — Validate
 
-```text
-Normal upload
-↓
-Harmless traversal
-↓
-Static write
-```
+- Establish normal ZIP upload behavior.
+- Investigate archive member path handling.
+- Use a harmless marker to test the extraction boundary.
+- Confirm the resulting static-file write.
 
-### Stage 4 — Chain
+### Stage 4 — Analyze the execution boundary
 
-```text
-Worker hook
-↓
-Controlled callback
-↓
-Shell
-```
+- Investigate the dashboard's worker-hook behavior.
+- Relate the file-write primitive to the downstream consumer.
+- Review the documented callback and shell evidence.
 
-### Stage 5 — Document
+### Stage 5 — Document and defend
 
-```text
-Evidence
-↓
-Root cause
-↓
-Impact
-↓
-Remediation
-```
+- Preserve evidence for each stage.
+- Explain the root cause and impact.
+- Identify relevant detection opportunities.
+- Recommend controls that address the underlying trust boundaries.
 
-This approach makes the exploitation process reproducible and defensible.
+This methodology separates discovery, validation, impact assessment, and remediation. It also avoids treating a single successful request as proof of the entire exploitation chain.
 
----
+## Root Cause Analysis
 
-# 🛡️ Root Cause
+<a id="root-cause"></a>
 
-The central vulnerability is insufficient validation of archive member paths.
+The primary root cause is insufficient validation of archive member paths during extraction.
 
-The application trusts a path supplied by the ZIP archive instead of enforcing:
+The application trusts paths supplied by the ZIP archive instead of ensuring that each resolved destination remains inside the authorized extraction directory.
 
-```text
-archive member
-      ↓
-canonical path
-      ↓
-safe extraction root
-```
+The secondary design weakness is the relationship between uploaded content and the background worker.
 
-The secondary design issue is allowing a background worker to process content that can be influenced by the upload mechanism.
-
----
-
-# 🔧 Remediation
-
-## 1. Enforce extraction-root boundaries
-
-Every archive member should be canonicalized and checked before writing.
-
-Reject:
-
-```text
-../
-..\ 
-absolute paths
-```
-
-and unsafe symlink behavior.
-
----
-
-## 2. Separate uploads from executable code
-
-Uploaded content should reside in a dedicated, non-executable storage location.
-
-Avoid:
-
-```text
-uploads → application code → worker
-```
-
-Prefer:
-
-```text
-uploads → isolated data store → validated data processing
-```
-
----
-
-## 3. Never execute uploaded source
-
-Worker automation should process a strict data format rather than executing arbitrary files supplied through an upload.
-
----
-
-## 4. Apply least privilege
-
-The web application and worker should run with minimal filesystem and process permissions.
-
----
-
-## 5. Remove client-visible secrets
-
-Credentials must never be embedded in HTML comments, JavaScript, or other browser-delivered resources.
-
----
-
-## 6. Monitor filesystem boundaries
-
-Alert when the application writes outside its expected upload directory.
-
----
-
-# 🕵️ Detection Opportunities
-
-| Signal | Possible meaning |
-|---|---|
-| `../` in ZIP members | Zip Slip attempt |
-| Absolute archive paths | Extraction-boundary bypass attempt |
-| Writes outside upload root | Arbitrary file-write activity |
-| New `.py` files in worker directories | Possible execution staging |
-| Web process spawning shell interpreters | Potential RCE |
-| Unexpected outbound TCP connections | Possible reverse shell |
-| Worker creates unexpected child processes | Potential compromise |
-| Application files modified after upload | Possible archive traversal |
-
----
-
-# 📊 Security Impact
-
-| Component | Finding | Impact |
+| Component | Design weakness | Security consequence |
 |---|---|---|
-| Login page | Source disclosure | Credential exposure |
-| ZIP extraction | Zip Slip | Path traversal |
-| Filesystem | Arbitrary write | Attacker-controlled file placement |
-| Worker | Hook processing | Execution boundary crossed |
-| Host | Reverse shell | Remote command execution |
-| User context | `roomservice` | Application-level shell |
-| Objective | `flag.txt` | Challenge completion |
+| Login page | Credential included in client-visible source | Authentication material disclosure |
+| ZIP extractor | Archive paths not sufficiently constrained | Path traversal |
+| Filesystem | Writes permitted outside the expected extraction directory | Arbitrary file placement within the process's permissions |
+| Worker | Attacker-influenced files reach automated processing | Potential execution of untrusted content |
+| Application process | Excessive permissions would enlarge the impact | Greater potential filesystem and process compromise |
 
----
+The primary lesson is that upload validation, filesystem confinement, and worker isolation must be designed as complementary controls.
 
-# 🧠 Lessons Learned
+## Security Findings and Impact
 
-## 01 — HTTP errors can reveal application structure
+<a id="security-findings"></a>
 
-A `405` response can confirm an endpoint exists even when the request method is incorrect.
+The following findings summarize the issues documented in the original investigation. No CVE identifiers or numerical severity ratings are assigned because the source documentation does not establish them.
 
-## 02 — Source is part of the attack surface
+| Finding | Evidence described in the source | Impact |
+|---|---|---|
+| Client-side credential disclosure | Login page source exposes the lab credential | Credential exposure and weakened authentication secrecy |
+| Zip Slip / path traversal | Harmless traversal-marker test | Escape from the intended extraction directory |
+| Arbitrary file write | Browser-readable static artifact | Attacker-controlled file placement, subject to process permissions |
+| Unsafe worker trust boundary | Dashboard worker clue and hook-placement evidence | Potential execution of attacker-influenced content |
+| Remote code execution | Documented worker-mediated callback and shell outcome | Shell access as `roomservice` |
 
-Anything delivered to a browser can be inspected.
+<div class="key-finding">
+  <div class="key-finding-title">Impact Summary</div>
 
-## 03 — Archive filenames are untrusted input
-
-ZIP extraction should be treated as filesystem-sensitive processing.
-
-## 04 — Validate primitives incrementally
-
-A harmless marker is a better first proof than immediately deploying an execution payload.
-
-## 05 — Impact depends on architecture
-
-Arbitrary file write becomes much more severe when a trusted process automatically consumes the written file.
-
-## 06 — Application hints can reveal trust boundaries
-
-The worker description provided a clue about where attacker-controlled content could cross into trusted execution.
-
-## 07 — Good CTF documentation explains why
-
-A professional write-up should answer:
-
-```text
-What did I discover?
-Why did it matter?
-What did I test?
-What did the result prove?
-How did the vulnerabilities chain?
-How would a defender fix it?
-```
-
----
-
-# 🧰 Skills & Techniques
-
-<div class="pills">
-<span class="pill">Nmap</span>
-<span class="pill">Gobuster</span>
-<span class="pill">HTTP Analysis</span>
-<span class="pill">HTML Source Inspection</span>
-<span class="pill">ZIP Analysis</span>
-<span class="pill">Python</span>
-<span class="pill">Path Traversal</span>
-<span class="pill">Zip Slip</span>
-<span class="pill">Arbitrary File Write</span>
-<span class="pill">Netcat</span>
-<span class="pill">Linux</span>
-<span class="pill">Web Exploitation</span>
+  The documented chain progresses from information disclosure and unsafe file handling to arbitrary file write and worker-mediated execution. The reported end state is a shell under the `roomservice` account, with the challenge objective at `/home/roomservice/flag.txt`.
 </div>
 
----
+## Security Recommendations
 
-# 📁 Evidence & Documentation Structure
+<a id="remediation"></a>
+
+### 1. Enforce extraction-root boundaries
+
+Canonicalize every archive member's destination and verify that it remains inside the authorized extraction directory before writing.
+
+Reject unsafe absolute paths, traversal components, and symbolic-link behavior that could bypass the boundary. Validation should use filesystem-aware path handling rather than relying only on string comparisons.
+
+**Finding → Risk → Control**
+
+```text
+Zip Slip
+    |
+    v
+Filesystem boundary bypass
+    |
+    v
+Canonical path validation
++ confined extraction
+```
+
+### 2. Separate uploaded data from executable code
+
+Store uploaded content in a dedicated location that is not part of the application code tree and is not automatically treated as executable content.
+
+Prefer a design in which uploads are handled as validated data rather than as code or executable hooks.
+
+```text
+Untrusted upload
+       |
+       v
+Isolated data storage
+       |
+       v
+Validated processing
+```
+
+### 3. Do not execute uploaded source
+
+The worker should consume a strict, documented data format instead of executing arbitrary files supplied through the upload interface.
+
+If automation is required, use an allowlisted set of predefined operations with explicit validation and authorization.
+
+### 4. Apply least privilege
+
+Run the web application and worker under separate, minimally privileged accounts where practical.
+
+Restrict filesystem write access, process execution, and network access to what each component requires. The worker should not be able to modify sensitive application files simply because it processes uploaded content.
+
+### 5. Remove client-visible secrets
+
+Remove credentials from HTML comments, JavaScript, embedded configuration, and other browser-delivered resources.
+
+Rotate exposed credentials and use appropriate server-side secret management. Authentication secrets should never depend on the obscurity of page source.
+
+### 6. Monitor filesystem boundaries
+
+Record and alert on unexpected writes outside the designated upload directory.
+
+Useful monitoring includes:
+
+- Unexpected modifications to application files.
+- New source files in worker-controlled directories.
+- Archive members containing traversal patterns.
+- Worker activity involving files created by the upload service.
+
+### 7. Restrict worker execution behavior
+
+Constrain which file types and operations the worker can process. Where feasible, isolate worker execution and restrict outbound network connections to the destinations necessary for its legitimate function.
+
+### 8. Add regression tests
+
+Create automated tests for archive members containing:
+
+- Parent-directory traversal.
+- Absolute paths.
+- Alternate path separators.
+- Symbolic links.
+- Nested paths that resolve outside the extraction root.
+
+Verify that rejected entries cannot create files outside the permitted directory.
+
+## Detection Opportunities
+
+<a id="detection"></a>
+
+The documented attack chain suggests several useful defensive monitoring signals.
+
+| Signal | Possible interpretation | Defensive response |
+|---|---|---|
+| `../` or equivalent traversal patterns in archive members | Possible Zip Slip attempt | Reject the archive entry and record the event |
+| Absolute paths in archive entries | Attempt to escape the extraction boundary | Validate and reject unsafe paths |
+| Writes outside the upload root | Potential path traversal or arbitrary file write | Investigate the originating request and process |
+| Unexpected `.py` files in worker directories | Possible execution staging | Validate the file's origin and worker activity |
+| Web or worker processes spawning shell interpreters unexpectedly | Potential command or code execution | Correlate process telemetry with upload events |
+| Unexpected outbound TCP connections | Possible callback or reverse-shell activity | Investigate destination, process ancestry, and timing |
+| Worker-created child processes outside normal behavior | Possible execution of untrusted content | Review worker inputs and process activity |
+| Application files modified following an upload | Possible archive traversal | Preserve filesystem and request evidence |
+
+These signals are detection opportunities, not proof of compromise in isolation. Correlating upload events, filesystem changes, worker activity, and outbound connections provides a stronger basis for investigation.
+
+## Lessons Learned
+
+<a id="lessons-learned"></a>
+
+### 01 — HTTP errors can reveal application structure
+
+A `405 Method Not Allowed` response can provide useful evidence that a route rejects the requested method. It is a lead for further investigation, not proof of every endpoint capability.
+
+### 02 — Client-delivered source is part of the attack surface
+
+HTML comments and other browser-visible content should never be treated as secret storage.
+
+### 03 — Archive member paths are untrusted input
+
+Extractors must enforce filesystem boundaries for every member rather than trusting the archive's directory structure.
+
+### 04 — Validate primitives incrementally
+
+A harmless traversal marker and a static-file proof provide clearer evidence than jumping directly to an execution attempt.
+
+### 05 — Arbitrary file write is not automatically code execution
+
+The impact depends on which destinations are writable and whether another component interprets the resulting files in a security-sensitive way.
+
+### 06 — Downstream consumers can amplify vulnerabilities
+
+A background worker may transform a file-write issue into an execution path when it processes attacker-controlled content.
+
+### 07 — Application hints can reveal trust boundaries
+
+The dashboard's automation-hook description provided a lead for investigating how uploaded files were consumed after extraction.
+
+### 08 — Good documentation explains the evidence
+
+A strong technical write-up should answer:
+
+- What was discovered?
+- Why did the finding matter?
+- What did the test demonstrate?
+- What evidence supports the conclusion?
+- How did the weaknesses combine?
+- Which controls would prevent recurrence?
+
+## Skills and Tools
+
+<a id="skills-and-tools"></a>
+
+The original documentation identifies the following tools and technical skills.
+
+### Tools
+
+| Tool | Documented purpose |
+|---|---|
+| Nmap | Initial network-service enumeration |
+| Gobuster | Web-content enumeration |
+| Netcat | Listener associated with the documented shell workflow |
+| Python | Listed among the investigation's technical skills |
+
+### Technical skills demonstrated
+
+<div class="tool-list">
+  <span class="tool-tag">Network Reconnaissance</span>
+  <span class="tool-tag">HTTP Analysis</span>
+  <span class="tool-tag">HTML Source Inspection</span>
+  <span class="tool-tag">Web Enumeration</span>
+  <span class="tool-tag">ZIP Analysis</span>
+  <span class="tool-tag">Path Traversal</span>
+  <span class="tool-tag">Zip Slip</span>
+  <span class="tool-tag">Arbitrary File Write</span>
+  <span class="tool-tag">Worker Trust Boundaries</span>
+  <span class="tool-tag">Linux</span>
+  <span class="tool-tag">Web Exploitation</span>
+  <span class="tool-tag">Security Remediation</span>
+</div>
+
+These skills reflect the activities described in the original write-up. The tools are not presented as an independently verified execution log.
+
+## Evidence and Repository Structure
+
+<a id="repository-structure"></a>
+
+The original documentation describes the following repository layout. It is retained here as a reference to the existing project structure.
 
 ```text
 The-Hollow-Shell-TryHackMe-Walkthrough/
-│
 ├── README.md
-│
 ├── Documentation/
 │   ├── Documentation.md
 │   └── Documentation.docx
-│
 ├── Resources/
 │   └── notes.md
-│
 ├── Screenshots/
 │   └── README.md
-│
 ├── docs/
 │   ├── index.md
-│   │
 │   └── assets/
 │       ├── 01-cover.svg
 │       ├── 02-recon-nmap.svg
@@ -1023,225 +1099,134 @@ The-Hollow-Shell-TryHackMe-Walkthrough/
 │       ├── 11-shell-flag-redacted.svg
 │       └── css/
 │           └── custom.scss
-│
 └── _config.yml
 ```
 
-The image set is deliberately limited to **11 major evidence assets** so the portfolio remains readable and visually consistent.
+The SVG filenames and image references in this document remain unchanged. The three permanent master files for the shared portfolio architecture are not being regenerated here.
 
----
+The repository tree is reproduced from the original documentation; it does not assert that every listed file has been independently checked for existence.
 
-# 🖼️ Complete Asset Index
+## Related Documentation
 
-## `01-cover.svg`
+<a id="related-documentation"></a>
 
-Challenge identity, theme, and high-level exploitation focus.
+### Full technical report
 
-## `02-recon-nmap.svg`
+[`Documentation/Documentation.md`](../Documentation/Documentation.md)
 
-Network reconnaissance showing the exposed services.
+The detailed report is described as containing the investigation, exploitation reasoning, evidence mapping, remediation, and detection analysis.
 
-## `03-upload-method.svg`
+### Research notes
 
-The `/upload` endpoint returning `405 Method Not Allowed`.
+[`Resources/notes.md`](../Resources/notes.md)
 
-## `04-source-disclosure.svg`
+The research notes are described as containing technical observations, troubleshooting, investigation reasoning, and defensive analysis.
 
-Client-visible source containing the lab credential.
+### Word report
 
-## `05-dashboard-upload.svg`
+[`Documentation/Documentation.docx`](../Documentation/Documentation.docx)
 
-Authenticated Shoreline Display upload interface.
-
-## `06-test-upload.svg`
-
-Baseline ZIP upload and normal application behavior.
-
-## `07-zipslip-marker.svg`
-
-Harmless traversal marker proving the extraction boundary is bypassable.
-
-## `08-zipslip-static-proof.svg`
-
-Static-file validation of arbitrary file write.
-
-## `09-hook-write.svg`
-
-Controlled write reaching the worker hook location.
-
-## `10-payload-archive.svg`
-
-Final archive structure used in the execution chain.
-
-## `11-shell-flag-redacted.svg`
-
-Reverse shell evidence with the objective output redacted.
-
----
-
-# 📚 Related Documentation
-
-### Full Technical Report
-
-**[`Documentation/Documentation.md`](../Documentation/Documentation.md)**
-
-The detailed technical report contains the complete investigation, exploitation reasoning, evidence mapping, remediation, and detection analysis.
-
-### Research Notes
-
-**[`Resources/notes.md`](../Resources/notes.md)**
-
-The consolidated research and technical notes contain the underlying reasoning, observations, quick reference, troubleshooting, and defensive analysis.
-
-### Word Report
-
-**[`Documentation/Documentation.docx`](../Documentation/Documentation.docx)**
-
-A formatted Word version of the technical report.
+The formatted Word version of the technical report.
 
 ### Repository README
 
-**[`README.md`](../README.md)**
+[`README.md`](../README.md)
 
 The repository landing page provides the shorter portfolio overview.
 
----
+## Portfolio Takeaway
 
-# 🏆 Portfolio Takeaway
-
-The most important result of this room is not simply obtaining a shell.
-
-The meaningful security workflow is:
+The value of this challenge lies in understanding how multiple weaknesses interact.
 
 ```text
 Enumerate
-    ↓
+    |
+    v
 Understand the application
-    ↓
+    |
+    v
 Identify trust boundaries
-    ↓
+    |
+    v
 Establish baseline behavior
-    ↓
-Validate the vulnerability safely
-    ↓
-Demonstrate impact
-    ↓
-Chain the primitive
-    ↓
-Collect evidence
-    ↓
+    |
+    v
+Validate the vulnerability
+    |
+    v
+Demonstrate file-write impact
+    |
+    v
+Analyze worker processing
+    |
+    v
+Document the execution outcome
+    |
+    v
 Explain root cause
-    ↓
-Recommend remediation
+    |
+    v
+Recommend defensive controls
 ```
 
-The Hollow Shell demonstrates how a seemingly ordinary upload feature can become a remote-code-execution path when:
+The Hollow Shell demonstrates the risk created by the combination of:
 
 ```text
-untrusted archive paths
-        +
-unsafe extraction
-        +
-arbitrary file write
-        +
-trusted worker processing
+Untrusted archive paths
+          +
+Unsafe extraction
+          +
+Arbitrary file write
+          +
+Trusted worker processing
 ```
 
-are allowed to interact.
+A professional security assessment must establish each step with evidence and distinguish the underlying vulnerability from its downstream impact.
 
-That combination is the core lesson of the challenge.
+## Flag Policy
 
----
+<a id="flag-policy"></a>
 
-# 🔐 Flag Policy
+The final flag is intentionally excluded from this public portfolio document.
 
-The final flag is intentionally excluded from this portfolio documentation.
-
-Public evidence stops at:
+The documented objective is:
 
 ```text
 /home/roomservice/flag.txt
 ```
 
-and represents the output as:
+The output is represented as:
 
 ```text
 [ FLAG OUTPUT REDACTED ]
 ```
 
-This keeps the repository focused on security methodology and technical understanding rather than functioning as a direct answer repository.
+This policy keeps the repository focused on methodology, technical understanding, evidence, and defensive learning rather than functioning as a direct challenge-answer repository.
 
----
+## Responsible Use
 
-# ⚖️ Responsible Use
+<a id="responsible-use"></a>
 
-This documentation concerns an intentionally vulnerable **TryHackMe** training environment.
+This documentation concerns an intentionally vulnerable TryHackMe training environment.
 
 The techniques described should only be reproduced against:
 
-- systems you own;
-- systems for which you have explicit authorization;
-- intentionally vulnerable training environments.
+- Systems you own.
+- Systems for which you have explicit authorization.
+- Intentionally vulnerable training environments.
 
-Do not apply these techniques to production systems without authorization.
+Do not apply these techniques to production systems without authorization. File-upload and archive-extraction testing should be performed in a controlled environment with appropriate safeguards.
 
----
+## References
 
-# 🔗 References
+<a id="references"></a>
 
 - [TryHackMe — The Hollow Shell](https://tryhackme.com/room/hh-thehollowshell-ddb582ac)
 - [OWASP — Path Traversal](https://owasp.org/www-community/attacks/Path_Traversal)
 - [OWASP — File Upload Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html)
 - [Reference walkthrough — Crystalcascade14](https://crystalcascade14.medium.com/the-hollow-shell-9d9c1946d6f2)
 
-The TryHackMe room identifies **The Hollow Shell** as a 90-point, Medium-difficulty Web challenge in Hacker Holidays 2026. citeturn0search1
+The original documentation describes the room as a 90-point, Medium-difficulty Web challenge in Hacker Holidays 2026.
 
-Independent public write-ups also describe the core challenge around unsafe ZIP extraction / Zip Slip and a subsequent execution path, providing useful cross-checking of the general vulnerability chain. citeturn0search0turn0search2
+The referenced independent walkthrough is retained as a supplementary source. No additional CVE, advisory, or external technical reference has been introduced.
 
----
-
-# 👤 Author
-
-## Anurag Revankar
-
-**Cybersecurity · Web Security · CTFs · Vulnerability Research**
-
-<p align="center">
-
-<a href="https://github.com/anurag-rvnkr1">
-<img src="https://img.shields.io/badge/GitHub-anurag--rvnkr1-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
-</a>
-
-</p>
-
----
-
-<div class="callout">
-
-### 🐚 Final Note
-
-**The Hollow Shell**
-
-```text
-Enumerate
-    →
-Understand
-    →
-Validate
-    →
-Exploit
-    →
-Document
-    →
-Defend
-```
-
-A good CTF write-up should not only show **how the target was compromised**.
-
-It should explain **why the vulnerability existed, how the weaknesses chained together, what evidence proved each stage, and how the system could be made resilient against the same attack.**
-
-</div>
-
-<p align="center">
-  <sub>TryHackMe Hacker Holidays 2026 · Day 10 · Public portfolio edition · Flags intentionally redacted</sub>
-</p>
