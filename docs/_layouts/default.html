@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="{{ site.lang | default: 'en-US' }}">
+
+<head>
+
+  <!-- =========================================================
+       CORE DOCUMENT METADATA
+       ========================================================= -->
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="description"
+    content="{{ page.description | default: site.description | escape }}"
+  >
+
+  <meta
+    name="author"
+    content="{{ site.author | default: 'Cybersecurity Researcher' | escape }}"
+  >
+
+  <meta
+    name="robots"
+    content="index, follow"
+  >
+
+  <meta
+    name="theme-color"
+    content="#050807"
+  >
+
+  <meta
+    name="color-scheme"
+    content="dark"
+  >
+
+  <meta
+    name="generator"
+    content="Jekyll"
+  >
+
+  <!-- =========================================================
+       CANONICAL URL
+       ========================================================= -->
+
+  <link
+    rel="canonical"
+    href="{{ page.url | absolute_url }}"
+  >
+
+  <!-- =========================================================
+       PAGE TITLE
+       ========================================================= -->
+
+  <title>
+    {% if page.title %}
+      {{ page.title }} | {{ site.title }}
+    {% else %}
+      {{ site.title }}
+    {% endif %}
+  </title>
+
+  <!-- =========================================================
+       OPEN GRAPH
+       ========================================================= -->
+
+  <meta
+    property="og:type"
+    content="website"
+  >
+
+  <meta
+    property="og:title"
+    content="{% if page.title %}{{ page.title }} | {{ site.title }}{% else %}{{ site.title }}{% endif %}"
+  >
+
+  <meta
+    property="og:description"
+    content="{{ page.description | default: site.description | escape }}"
+  >
+
+  <meta
+    property="og:url"
+    content="{{ page.url | absolute_url }}"
+  >
+
+  {% if page.image %}
+  <meta
+    property="og:image"
+    content="{{ page.image | absolute_url }}"
+  >
+  {% elsif site.image %}
+  <meta
+    property="og:image"
+    content="{{ site.image | absolute_url }}"
+  >
+  {% endif %}
+
+  <!-- =========================================================
+       TWITTER / X CARD
+       ========================================================= -->
+
+  <meta
+    name="twitter:card"
+    content="summary_large_image"
+  >
+
+  <meta
+    name="twitter:title"
+    content="{% if page.title %}{{ page.title }} | {{ site.title }}{% else %}{{ site.title }}{% endif %}"
+  >
+
+  <meta
+    name="twitter:description"
+    content="{{ page.description | default: site.description | escape }}"
+  >
+
+  {% if page.image %}
+  <meta
+    name="twitter:image"
+    content="{{ page.image | absolute_url }}"
+  >
+  {% elsif site.image %}
+  <meta
+    name="twitter:image"
+    content="{{ site.image | absolute_url }}"
+  >
+  {% endif %}
+
+  <!-- =========================================================
+       FAVICON
+       ========================================================= -->
+
+  {% if site.favicon %}
+  <link
+    rel="icon"
+    href="{{ site.favicon | relative_url }}"
+  >
+  {% endif %}
+
+  <!-- =========================================================
+       STYLES
+       ========================================================= -->
+
+  <link
+    rel="stylesheet"
+    href="{{ '/assets/css/custom.css' | relative_url }}"
+  >
+
+  <!-- =========================================================
+       OPTIONAL JEKYLL SEO PLUGIN
+       ========================================================= -->
+
+  {% seo %}
+
+</head>
+
+
+<body>
+
+  <!-- =========================================================
+       ACCESSIBILITY
+       ========================================================= -->
+
+  <a
+    class="skip-link"
+    href="#main-content"
+  >
+    Skip to main content
+  </a>
+
+
+  <!-- =========================================================
+       SECURITY / TERMINAL HEADER
+       ========================================================= -->
+
+  <header class="portfolio-header">
+
+    <div class="portfolio-header-inner">
+
+
+      <!-- BRAND -->
+
+      <a
+        class="portfolio-brand"
+        href="{{ '/' | relative_url }}"
+        aria-label="Cybersecurity CTF Portfolio home"
+      >
+
+        <span
+          class="portfolio-brand-symbol"
+          aria-hidden="true"
+        >
+          &gt;_
+        </span>
+
+        <span class="portfolio-brand-text">
+          The Hollow Shell
+        </span>
+
+      </a>
+
+
+      <!-- NAVIGATION -->
+
+      <nav
+        class="portfolio-navigation"
+        aria-label="Primary navigation"
+      >
+
+        <a
+          href="{{ '/' | relative_url }}"
+        >
+          HOME
+        </a>
+
+        {% if site.github_url %}
+        <a
+          href="{{ site.github_url }}"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          GITHUB
+        </a>
+        {% endif %}
+
+        {% if site.about_url %}
+        <a
+          href="{{ site.about_url | relative_url }}"
+        >
+          ABOUT
+        </a>
+        {% endif %}
+
+      </nav>
+
+
+      <!-- SECURITY STATUS -->
+
+      <div
+        class="portfolio-status"
+        aria-label="Security research status"
+      >
+
+        <span
+          class="status-indicator"
+          aria-hidden="true"
+        ></span>
+
+        <span class="status-text">
+          CTF WRITEUP
+        </span>
+
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <!-- =========================================================
+       BREADCRUMB
+       ========================================================= -->
+
+  {% if page.url != '/' %}
+
+  <nav
+    class="portfolio-breadcrumb"
+    aria-label="Breadcrumb"
+  >
+
+    <div class="portfolio-breadcrumb-inner">
+
+      <a href="{{ '/' | relative_url }}">
+        ~/portfolio
+      </a>
+
+      <span aria-hidden="true">
+        /
+      </span>
+
+      {% if page.title %}
+      <span>
+        {{ page.title }}
+      </span>
+      {% endif %}
+
+    </div>
+
+  </nav>
+
+  {% endif %}
+
+
+  <!-- =========================================================
+       MAIN CONTENT
+       ========================================================= -->
+
+  <main
+    id="main-content"
+    class="site-main"
+  >
+
+    <div class="site-container">
+
+
+      <!-- PAGE HEADER -->
+
+      {% if page.title %}
+
+      <header class="page-header">
+
+        {% if page.category %}
+
+        <div class="page-category">
+
+          <span class="category-marker">
+            #
+          </span>
+
+          {{ page.category }}
+
+        </div>
+
+        {% endif %}
+
+
+        <h1 class="page-title">
+          {{ page.title }}
+        </h1>
+
+
+        {% if page.description %}
+
+        <p class="page-description">
+          {{ page.description }}
+        </p>
+
+        {% endif %}
+
+
+        {% if page.tags %}
+
+        <div
+          class="page-tags"
+          aria-label="Page tags"
+        >
+
+          {% for tag in page.tags %}
+
+          <span class="page-tag">
+            #{{ tag }}
+          </span>
+
+          {% endfor %}
+
+        </div>
+
+        {% endif %}
+
+      </header>
+
+      {% endif %}
+
+
+      <!-- CONTENT -->
+
+      <article class="markdown-body">
+
+        {{ content }}
+
+      </article>
+
+
+      <!-- PAGE FOOTER -->
+
+      {% if page.last_modified_at or page.date %}
+
+      <div class="page-meta">
+
+        {% if page.last_modified_at %}
+
+        <span>
+          LAST UPDATED:
+          {{ page.last_modified_at | date: "%d %b %Y" }}
+        </span>
+
+        {% elsif page.date %}
+
+        <span>
+          PUBLISHED:
+          {{ page.date | date: "%d %b %Y" }}
+        </span>
+
+        {% endif %}
+
+        <span class="meta-separator">
+          //
+        </span>
+
+        <span>
+          SECURITY RESEARCH DOCUMENTATION
+        </span>
+
+      </div>
+
+      {% endif %}
+
+    </div>
+
+  </main>
+
+
+  <!-- =========================================================
+       GLOBAL FOOTER
+       ========================================================= -->
+
+  <footer class="portfolio-global-footer">
+
+    <div class="portfolio-footer-inner">
+
+
+      <div class="footer-brand">
+
+        <span class="footer-terminal-symbol">
+          &gt;_
+        </span>
+
+        <span>
+          CTF PORTFOLIO
+        </span>
+
+      </div>
+
+
+      <div class="footer-divider">
+        //
+      </div>
+
+
+      <div class="footer-description">
+        SECURITY RESEARCH
+        <span>•</span>
+        PRACTICE
+        <span>•</span>
+        DEFENSE
+      </div>
+
+
+
+      <div class="footer-copyright">
+
+        © {{ 'now' | date: "%Y" }}
+        {{ site.author | default: "Anurag Revankar" }}
+
+      </div>
+
+    </div>
+
+  </footer>
+
+
+  <!-- =========================================================
+       NO JAVASCRIPT FALLBACK
+       ========================================================= -->
+
+  <noscript>
+
+    <div class="noscript-warning">
+
+      JavaScript is disabled.
+      This documentation remains fully accessible without JavaScript.
+
+    </div>
+
+  </noscript>
+
+</body>
+
+</html>
