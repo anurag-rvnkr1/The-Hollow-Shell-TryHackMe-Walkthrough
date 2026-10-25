@@ -20,15 +20,6 @@
 
 </div>
 
-<div class="callout warning">
-
-### Public Portfolio Policy
-
-The final challenge flag is intentionally redacted. Target-specific addresses are represented by placeholders where appropriate.
-
-This documentation emphasizes technical reasoning, evidence, vulnerability chaining, root cause, and defensive recommendations rather than publishing the challenge flag as an answer key.
-
-</div>
 
 ## Navigation
 
@@ -65,7 +56,6 @@ This documentation emphasizes technical reasoning, evidence, vulnerability chain
 <li><a href="#flag-policy">Flag Policy</a></li>
 <li><a href="#responsible-use">Responsible Use</a></li>
 <li><a href="#references">References</a></li>
-<li><a href="#author">Author</a></li>
 </ul>
 </div>
 
